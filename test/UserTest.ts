@@ -11,11 +11,13 @@ describe("User", () => {
 
         console.log("Creating Jake");
 
-        User.create([{ username: "Jake", displayName: "Jake" }]).then(() => {
-            console.log("CREATED")
-        }).catch((e) => {
-            console.log("ERROR", e)
-        });
+        await User.create({ username: "Jake", displayName: "Jake" });
+
+        // await User.create({ username: "Jake", displayName: "Jake" }).then(() => {
+        //     console.log("CREATED")
+        // }).catch((e) => {
+        //     console.log("ERROR", e)
+        // });
 
         // const jake = await User.create({ username: "Jake", displayName: "Jake" });
 
