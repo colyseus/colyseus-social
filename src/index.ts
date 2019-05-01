@@ -1,0 +1,55 @@
+import request from "phin";
+import mongoose from "mongoose";
+import User, { IUser } from "./models/User";
+
+// const FACEBOOK_APP_TOKEN = process.env.FACEBOOK_APP_TOKEN;
+const FACEBOOK_APP_TOKEN = '353169041992501|8d17708d062493030db44dd687b73e97';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/colyseus' ;
+
+export async function createConnection()  {
+    let conn;
+
+    try {
+        conn = await mongoose.createConnection(MONGO_URI, { autoIndex: false, useNewUrlParser: true });
+        console.log(`Successfully connected to ${MONGO_URI}`)
+
+        // reconnect if disconnected.
+        conn.on('disconnected', () => createConnection());
+    } catch (e) {
+        console.error('Error connecting to database: ', e);
+    }
+
+    return conn;
+}
+
+export async function facebookAuth(accessToken: string): Promise<IUser> {
+    const data: any = await request({
+        url: `https://graph.facebook.com/me?fields=friends?access_token=${accessToken}`,
+        parse: 'json'
+    });
+
+    const facebookID = data.id;
+    const friends = data.friends.data;
+
+    let update: Partial<IUser> = {};
+    update.email = data.email;
+    update.friends = friends;
+
+    const currentUser = await User.findOneAndUpdate({ facebookID }, update, { upsert: true });
+
+    // Add current user to existing users friend list.
+    await Promise.all(update.friends.map((_id) => {
+        return User.updateOne({ _id }, {
+            $addToSet: { friends: currentUser._id }
+        });
+    }));
+
+    return currentUser;
+}
+
+export async function getOnlineFriends (user: IUser) {
+    return await User.find({
+        _id: { $in: user.friends },
+        online: true
+    }, ['_id', 'username', 'displayName', 'avatarUrl']);
+}
