@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
 import assert from "assert";
 
-import { connect, getOnlineFriends, logout } from "../src";
+import { connect, getOnlineFriends, logout, facebookAuth } from "../src";
 import User, { IUser } from "../src/models/User";
-import { resetTestUsers, createFacebookTestUsers } from "./utils";
+import { resetTestUsers, createFacebookTestUsers, getTestUsersAccessTokens } from "./utils";
+import { getFacebookUser } from "../src/facebook";
 
 describe("User", () => {
     before(async () => {
@@ -21,7 +22,17 @@ describe("User", () => {
         assert.equal(friends.length, 4);
     });
 
-    it("should allow to login an existing user", () => {
+    it("should allow to login an existing user", async () => {
+        const accessToken = (await getTestUsersAccessTokens())[0];
+
+        const previousUsersCount = await User.countDocuments({});
+        const userData = await getFacebookUser(accessToken);
+
+        const user = await User.findOne({ facebookId: userData.id });
+        const authenticatedUser = await facebookAuth(accessToken);
+
+        assert.equal(previousUsersCount, await User.countDocuments({}));
+        assert.deepEqual(authenticatedUser._id, user._id);
     });
 
     // it("logout", async () => {

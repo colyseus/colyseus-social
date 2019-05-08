@@ -1,11 +1,13 @@
-import request from "phin";
 import mongoose from "mongoose";
+import jwt from "jsonwebtoken";
 import User, { IUser } from "./models/User";
+import { getFacebookUser } from "./facebook";
 
 const debug = require('debug')('@colyseus/social');
 
 const FACEBOOK_APP_TOKEN = process.env.FACEBOOK_APP_TOKEN || '353169041992501|8d17708d062493030db44dd687b73e97';
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/colyseus';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export async function connect() {
     try {
@@ -24,12 +26,12 @@ export async function logout(user: IUser) {
     return user.save();
 }
 
+export async function getToken(user: IUser) {
+    return jwt.sign(user.toJSON(), JWT_SECRET);
+}
+
 export async function facebookAuth(accessToken: string): Promise<IUser> {
-    const fields = 'id,name,short_name,friends,email,picture';
-    const data: any = (await request({
-        url: `https://graph.facebook.com/me?fields=${fields}&access_token=${accessToken}`,
-        parse: 'json'
-    })).body;
+    const data = await getFacebookUser(accessToken);
 
     if (data.error) {
         throw new Error(data.error.message);
