@@ -8,7 +8,7 @@ import { getTestUsersAccessTokens } from "../utils";
 import { getFacebookUser } from "../../src/facebook";
 import { connectDatabase } from "../../src";
 
-describe("Express Routes", () => {
+describe("Express", () => {
     const TESTPORT = 2267;
     const app = express();
     app.use("/auth", authRoutes);
@@ -40,7 +40,6 @@ describe("Express Routes", () => {
         const facebookData = await getFacebookUser(accessToken);
 
         const response = await request(`/auth/facebook?accessToken=${accessToken}`);
-        // console.log(response.body);
         assert.equal(response.statusCode, 200);
         assert.equal(response.body.facebookId, facebookData.id);
     });
