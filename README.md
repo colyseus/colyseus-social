@@ -1,8 +1,12 @@
 # @colyseus/social
 
-Social plugin for Colyseus
+Authentication and friend list integration for Colyseus
 
-## Environment variables
+## Authentication provides
+
+- Facebook
+
+## Environment Variables
 
 - `FACEBOOK_APP_TOKEN`: Facebook App Token (`"appid|appsecret"`)
 - `MONGO_URI`: MongoDB connection URI
