@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import assert from "assert";
 
 import { connect, getOnlineFriends } from "../src";
 import User, { IUser } from "../src/models/User";
@@ -19,14 +20,12 @@ describe("User", () => {
         await snake.save();
     });
 
-    after(async () => {
-        mongoose.connection.close();
-    });
+    after(async () => mongoose.connection.close());
 
-    it("should create an user", async () => {
+    it("getOnlineFriends", async () => {
         const jake = await User.findOne({ username: "Jake" });
         const friends = await getOnlineFriends(jake);
-        console.log(friends);
-
+        assert.equal(friends.length, 1);
+        assert.equal(friends[0].displayName, "Snake");
     });
 })
