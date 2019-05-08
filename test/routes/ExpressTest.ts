@@ -77,7 +77,5 @@ describe("Express", () => {
         assert.ok(friendNames.indexOf("Open") >= 0);
         assert.ok(friendNames.indexOf("Bob") >= 0);
         assert.ok(friendNames.indexOf("Maria") >= 0);
-
-        console.log(friendsResponse);
     });
 });
