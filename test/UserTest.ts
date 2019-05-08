@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import assert from "assert";
 
-import { connect, getOnlineFriends } from "../src";
+import { connect, getOnlineFriends, logout } from "../src";
 import User, { IUser } from "../src/models/User";
 
 describe("User", () => {
@@ -28,4 +28,10 @@ describe("User", () => {
         assert.equal(friends.length, 1);
         assert.equal(friends[0].displayName, "Snake");
     });
+
+    it("logout", async () => {
+        const jake = await User.findOne({ username: "Jake" });
+        await logout(jake);
+        assert.equal((await User.findOne({ username: "Jake" })).online, false);
+    })
 })

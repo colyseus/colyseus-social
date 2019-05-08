@@ -2,8 +2,7 @@ import request from "phin";
 import mongoose from "mongoose";
 import User, { IUser } from "./models/User";
 
-// const FACEBOOK_APP_TOKEN = process.env.FACEBOOK_APP_TOKEN;
-const FACEBOOK_APP_TOKEN = '353169041992501|8d17708d062493030db44dd687b73e97';
+const FACEBOOK_APP_TOKEN = process.env.FACEBOOK_APP_TOKEN || '353169041992501|8d17708d062493030db44dd687b73e97';
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/colyseus';
 
 export async function connect() {
@@ -48,9 +47,9 @@ export async function facebookAuth(accessToken: string): Promise<IUser> {
     return currentUser;
 }
 
-export async function getOnlineFriends(user: IUser) {
-    return await User.find({
-        _id: { $in: user.friendIDs },
-        online: true
-    }, ['_id', 'username', 'displayName', 'avatarUrl']);
+export async function getOnlineFriends(
+    user: IUser,
+    fields: Array<keyof IUser> = ['_id', 'username', 'displayName', 'avatarUrl'],
+) {
+    return await User.find({ _id: { $in: user.friendIDs }, online: true }, fields);
 }
