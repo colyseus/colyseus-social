@@ -14,27 +14,32 @@ export async function resetTestUsers() {
     return await User.deleteMany({});
 }
 
+let cachedAccessTokens: string[];
 export async function getTestUsersAccessTokens() {
-    const response: any = (await request({
-        url: `https://graph.facebook.com/v3.3/${FB_TEST_APP_ID}/accounts/test-users?access_token=${FB_TEST_APP_TOKEN}`,
-        parse: 'json'
-    })).body;
+    if (!cachedAccessTokens) {
+        const response: any = (await request({
+            url: `https://graph.facebook.com/v3.3/${FB_TEST_APP_ID}/accounts/test-users?access_token=${FB_TEST_APP_TOKEN}`,
+            parse: 'json'
+        })).body;
 
-    if (response.error) {
-        throw new Error(response.error);
+        if (response.error) {
+            throw new Error(response.error.message);
+        }
+
+        cachedAccessTokens = response.data.map(entry => entry.access_token);
     }
 
-    return response.data.map(entry => entry.access_token);
+    return cachedAccessTokens;
 }
 
-let cachedAccessTokens: string[];
+let cachedTestUsers: IUser[];
 export async function createFacebookTestUsers () {
-    if (!cachedAccessTokens) {
+    if (!cachedTestUsers) {
         const accessTokens = await getTestUsersAccessTokens();
-        cachedAccessTokens = await Promise.all(accessTokens.map((accessToken) => {
+        cachedTestUsers = await Promise.all(accessTokens.map((accessToken) => {
             return facebookAuth(accessToken);
         }));
     }
 
-    return cachedAccessTokens;
+    return cachedTestUsers;
 }
