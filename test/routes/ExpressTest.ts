@@ -60,5 +60,24 @@ describe("Express", () => {
 
         const user = await User.findOne({ _id: loginResponse.body._id });
         assert.equal(user.online, false);
-    })
+    });
+
+    it("should get a list of online friends", async () => {
+        const accessToken = (await getTestUsersAccessTokens())[1];
+        const jwt = (await loginRequest(accessToken)).body.token;
+
+        const friendsResponse = await request("/friends", { authorization: "Bearer " + jwt });
+        assert.equal(friendsResponse.statusCode, 200);
+
+        const friends = friendsResponse.body;
+        const friendNames = friends.map(friend => friend.displayName);
+        assert.deepEqual(Object.keys(friends[0]), ['username', 'displayName', 'avatarUrl', '_id']);
+        assert.ok(friends.length > 0);
+        assert.ok(friendNames.indexOf("Rick") >= 0);
+        assert.ok(friendNames.indexOf("Open") >= 0);
+        assert.ok(friendNames.indexOf("Bob") >= 0);
+        assert.ok(friendNames.indexOf("Maria") >= 0);
+
+        console.log(friendsResponse);
+    });
 });

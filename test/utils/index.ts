@@ -20,6 +20,10 @@ export async function getTestUsersAccessTokens() {
         parse: 'json'
     })).body;
 
+    if (response.error) {
+        throw new Error(response.error);
+    }
+
     return response.data.map(entry => entry.access_token);
 }
 
