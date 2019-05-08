@@ -27,7 +27,7 @@ const UserSchema: Schema = new Schema({
 
     lang:           { type: String, default: "en" },
     location:       { type: String, default: "" },
-    timezone:       { type: String, default: "" }, 
+    timezone:       { type: String, default: "" },
     metadata:       { type: Schema.Types.Mixed },
 
     deviceIDs:      { type: [String], default: [] },
@@ -44,4 +44,4 @@ const UserSchema: Schema = new Schema({
     online:         { type: Boolean, default: true },
 });
 
-export default mongoose.model<IUser>('users', UserSchema);
+export default mongoose.model<IUser>('User', UserSchema);
