@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { ObjectID } from 'bson';
 
 export interface IUser extends Document {
     username: string,
@@ -11,38 +12,38 @@ export interface IUser extends Document {
     metadata: any,
 
     email: string,
-    facebookID: string,
-    googleID: string,
-    gameCenterID: string,
+    facebookId: string,
+    googleId: string,
+    gameCenterId: string,
     steamId: string,
 
-    friendIDs: string[],
+    friendIds: string[],
     online: boolean,
 
     createdAt: Date,
     updatedAt: Date,
 }
 
-const UserSchema: Schema = new Schema({
+const UserSchema: Schema = new Schema<IUser>({
     username:       { type: String, minlength: 3, default: "" },
     displayName:    { type: String, minlength: 3, default: "" },
-    avatarURL:      { type: String, default: "" },
+    avatarUrl:      { type: String, default: "" },
 
     lang:           { type: String, default: "en" },
     location:       { type: String, default: "" },
     timezone:       { type: String, default: "" },
     metadata:       { type: Schema.Types.Mixed },
 
-    deviceIDs:      { type: [String], default: [] },
+    deviceIds:      { type: [String], default: [] },
 
     email:          { type: String, default: "" },
     password:       { type: String, default: "" },
 
-    facebookID:     { type: String, default: "" },
-    googleID:       { type: String, default: "" },
-    gameCenterID:   { type: String, default: "" },
-    steamID:        { type: String, default: "" },
-    friendIDs:      { type: [String], default: [] },
+    facebookId:     { type: String, default: "" },
+    googleId:       { type: String, default: "" },
+    gameCenterId:   { type: String, default: "" },
+    steamId:        { type: String, default: "" },
+    friendIds:      { type: [Schema.Types.ObjectId], default: [] },
 
     online:         { type: Boolean, default: true }
 }, {

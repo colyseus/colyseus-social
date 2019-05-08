@@ -25,24 +25,52 @@ export async function logout(user: IUser) {
 }
 
 export async function facebookAuth(accessToken: string): Promise<IUser> {
-    const data: any = await request({
-        url: `https://graph.facebook.com/me?fields=friends?access_token=${accessToken}`,
+    const fields = 'id,name,friends,email,picture';
+    const data: any = (await request({
+        url: `https://graph.facebook.com/me?fields=${fields}&access_token=${accessToken}`,
         parse: 'json'
-    });
+    })).body;
 
-    const facebookID = data.id;
-    const friends = data.friends.data;
+    if (data.error) {
+        throw new Error(data.error.message);
+    }
 
-    let update: Partial<IUser> = {};
-    update.email = data.email;
-    update.friendIDs = friends;
+    const facebookId = data.id;
 
-    const currentUser = await User.findOneAndUpdate({ facebookID }, update, { upsert: true });
+    // fetch existing users by their facebookId from database
+    const facebookFriendsIds = data.friends.data.map(friend => friend.id);
+    const friendIds = (await User.
+        find({ facebookId: { $in: facebookFriendsIds } }, ["_id"])).
+        map(user => user._id);
+
+    // find or create user
+    const currentUser = (await User.findOne({ facebookId })) || new User();
+    if (!currentUser.username) {
+        currentUser.username = data.name;
+    }
+
+    if (!currentUser.displayName) {
+        currentUser.displayName = data.name;
+    }
+
+    if (!currentUser.email) {
+        currentUser.email = data.email;
+    }
+
+    if (!currentUser.avatarUrl) {
+        currentUser.avatarUrl = data.picture.data.url;
+    }
+
+    currentUser.facebookId = facebookId;
+    currentUser.online = true;
+    currentUser.friendIds = friendIds;
+    console.log("currentUser", currentUser);
+    currentUser.save();
 
     // Add current user to existing users friend list.
-    await Promise.all(update.friendIDs.map((_id) => {
+    await Promise.all(friendIds.map((_id) => {
         return User.updateOne({ _id }, {
-            $addToSet: { friendIDs: currentUser._id }
+            $addToSet: { friendIds: currentUser._id }
         });
     }));
 
@@ -53,5 +81,5 @@ export async function getOnlineFriends(
     user: IUser,
     fields: Array<keyof IUser> = ['_id', 'username', 'displayName', 'avatarUrl'],
 ) {
-    return await User.find({ _id: { $in: user.friendIDs }, online: true }, fields);
+    return await User.find({ _id: { $in: user.friendIds }, online: true }, fields);
 }
