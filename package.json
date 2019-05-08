@@ -4,11 +4,15 @@
   "description": "Facebook integration for Colyseus",
   "main": "lib/index.js",
   "scripts": {
-    "test": "mocha --require ts-node/register test/**Test.ts --exit"
+    "clean": "find src -name *.js | xargs rm",
+    "test": "mocha --require ts-node/register test/**Test.ts --exit",
+    "prepublish": "npx tsc",
+    "postpublish": "npm run clean"
   },
+  "files": ["**/*.js"],
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/colyseus/colyseus-facebook.git"
+    "url": "git+ssh://git@github.com/colyseus/colyseus-social.git"
   },
   "keywords": [
     "colyseus",
@@ -20,14 +24,16 @@
   "author": "Endel Dreyer",
   "license": "UNLICENSED",
   "bugs": {
-    "url": "https://github.com/colyseus/colyseus-facebook/issues"
+    "url": "https://github.com/colyseus/colyseus-social/issues"
   },
-  "homepage": "https://github.com/colyseus/colyseus-facebook#readme",
+  "homepage": "https://github.com/colyseus/colyseus-social#readme",
   "dependencies": {
+    "debug": "^4.1.1",
     "mongoose": "^5.5.6",
     "phin": "^3.3.0"
   },
   "devDependencies": {
+    "@types/debug": "^4.1.4",
     "@types/mocha": "^5.2.6",
     "@types/mongoose": "^5.3.27",
     "@types/phin": "^3.3.0",
