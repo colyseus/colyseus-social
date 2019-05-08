@@ -29,14 +29,14 @@ export async function facebookAuth(accessToken: string): Promise<IUser> {
 
     let update: Partial<IUser> = {};
     update.email = data.email;
-    update.friends = friends;
+    update.friendIDs = friends;
 
     const currentUser = await User.findOneAndUpdate({ facebookID }, update, { upsert: true });
 
     // Add current user to existing users friend list.
-    await Promise.all(update.friends.map((_id) => {
+    await Promise.all(update.friendIDs.map((_id) => {
         return User.updateOne({ _id }, {
-            $addToSet: { friends: currentUser._id }
+            $addToSet: { friendIDs: currentUser._id }
         });
     }));
 
@@ -45,7 +45,7 @@ export async function facebookAuth(accessToken: string): Promise<IUser> {
 
 export async function getOnlineFriends(user: IUser) {
     return await User.find({
-        _id: { $in: user.friends },
+        _id: { $in: user.friendIDs },
         online: true
     }, ['_id', 'username', 'displayName', 'avatarUrl']);
 }

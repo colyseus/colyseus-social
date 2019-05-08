@@ -16,7 +16,7 @@ export interface IUser extends Document {
     gameCenterID: string,
     steamId: string,
 
-    friends: string[],
+    friendIDs: string[],
     online: boolean,
 }
 
