@@ -25,7 +25,7 @@ export async function logout(user: IUser) {
 }
 
 export async function facebookAuth(accessToken: string): Promise<IUser> {
-    const fields = 'id,name,friends,email,picture';
+    const fields = 'id,name,short_name,friends,email,picture';
     const data: any = (await request({
         url: `https://graph.facebook.com/me?fields=${fields}&access_token=${accessToken}`,
         parse: 'json'
@@ -47,7 +47,7 @@ export async function facebookAuth(accessToken: string): Promise<IUser> {
     await User.updateOne({ facebookId }, {
         $setOnInsert: {
             username: data.name,
-            displayName: data.name,
+            displayName: data.short_name,
             email: data.email,
         },
         $set: {
