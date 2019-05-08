@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "clean": "find src -name *.js | xargs rm",
-    "test": "mocha --require ts-node/register test/**Test.ts --exit",
+    "test": "mocha --require ts-node/register test/**/*Test.ts --exit",
     "prepublish": "npx tsc",
     "postpublish": "npm run clean"
   },
@@ -43,6 +43,8 @@
     "@types/mocha": "^5.2.6",
     "@types/mongoose": "^5.3.27",
     "@types/phin": "^3.3.0",
+    "express": "^4.16.4",
+    "express-jwt": "^5.3.1",
     "mocha": "^6.1.4",
     "mongodb": "^3.2.3",
     "ts-node": "^8.1.0",

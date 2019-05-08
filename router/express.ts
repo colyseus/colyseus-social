@@ -22,13 +22,19 @@ const jwtMiddleware = jwt({
 });
 
 const route = express.Router();
-route.use(jwtMiddleware.unless({ path: "/facebook" }));
+route.use(jwtMiddleware.unless({ path: /\/facebook$/ }));
 
 route.get("/facebook", async (req, res) => {
-    const { accessToken } = req.params;
-    const user = await facebookAuth(accessToken);
-    const token = createToken(user);
-    res.json({ ...user, ...token });
+    try {
+        const { accessToken } = req.params;
+        const user = await facebookAuth(accessToken);
+        const token = createToken(user);
+        res.json({ ...user, ...token });
+
+    } catch (e) {
+        res.status(401);
+        res.json({ error: e.message })
+    }
 });
 
 route.get("/friends", async (req, res) => {
