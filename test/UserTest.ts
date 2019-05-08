@@ -35,9 +35,12 @@ describe("User", () => {
         assert.deepEqual(authenticatedUser._id, user._id);
     });
 
-    // it("logout", async () => {
-    //     const jake = await User.findOne({ username: "Jake" });
-    //     await logout(jake);
-    //     assert.equal((await User.findOne({ username: "Jake" })).online, false);
-    // })
-})
+    it("should logout user", async () => {
+        const onlineUser = await User.findOne({ online: true });
+        await logout(onlineUser._id.toString());
+
+        const offlineUser = await User.findOne({ _id: onlineUser._id });
+        assert.equal(offlineUser.online, false);
+    });
+
+});

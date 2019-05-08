@@ -21,9 +21,8 @@ export async function connect() {
     }
 }
 
-export async function logout(user: IUser) {
-    user.online = false;
-    return user.save();
+export async function logout(userId: string | mongoose.Schema.Types.ObjectId) {
+    return await User.updateOne({ _id: userId }, { $set: { online: false } });
 }
 
 export async function getToken(user: IUser) {

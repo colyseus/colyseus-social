@@ -1,4 +1,3 @@
-import fs from "fs";
 import request from "phin";
 import User, { IUser } from "../../src/models/User";
 import { facebookAuth } from "../../src";
@@ -13,9 +12,6 @@ export async function login(user: IUser) {
 
 export async function resetTestUsers() {
     return await User.deleteMany({});
-}
-
-export async function createFBTestUser() {
 }
 
 export async function getTestUsersAccessTokens() {
