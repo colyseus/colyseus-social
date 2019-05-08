@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "clean": "find src -name *.js | xargs rm",
-    "test": "mocha --require ts-node/register test/**/*Test.ts --exit",
+    "test": "mocha --require ts-node/register test/**Test.ts test/**/*Test.ts --exit",
     "prepublish": "npx tsc",
     "postpublish": "npm run clean"
   },

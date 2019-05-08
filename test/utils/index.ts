@@ -23,10 +23,14 @@ export async function getTestUsersAccessTokens() {
     return response.data.map(entry => entry.access_token);
 }
 
+let cachedAccessTokens: string[];
 export async function createFacebookTestUsers () {
-    const testAccessTokens = await getTestUsersAccessTokens();
+    if (!cachedAccessTokens) {
+        const accessTokens = await getTestUsersAccessTokens();
+        cachedAccessTokens = await Promise.all(accessTokens.map((accessToken) => {
+            return facebookAuth(accessToken);
+        }));
+    }
 
-    await Promise.all(testAccessTokens.map((accessToken) => {
-        return facebookAuth(accessToken);
-    }));
+    return cachedAccessTokens;
 }

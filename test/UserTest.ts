@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import assert from "assert";
 
-import { connect, getOnlineFriends, logout, facebookAuth } from "../src";
+import { connectDatabase, getOnlineFriends, logout, facebookAuth } from "../src";
 import User, { IUser } from "../src/models/User";
 import { resetTestUsers, createFacebookTestUsers, getTestUsersAccessTokens } from "./utils";
 import { getFacebookUser } from "../src/facebook";
@@ -9,7 +9,7 @@ import { getFacebookUser } from "../src/facebook";
 describe("User", () => {
     before(async () => {
         // connect & clear database.
-        await connect();
+        await connectDatabase();
         await resetTestUsers();
         await createFacebookTestUsers();
     });

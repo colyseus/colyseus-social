@@ -26,10 +26,10 @@ route.use(jwtMiddleware.unless({ path: /\/facebook$/ }));
 
 route.get("/facebook", async (req, res) => {
     try {
-        const { accessToken } = req.params;
+        const { accessToken } = req.query;
         const user = await facebookAuth(accessToken);
         const token = createToken(user);
-        res.json({ ...user, ...token });
+        res.json({ ...user.toJSON(), ...token });
 
     } catch (e) {
         res.status(401);
