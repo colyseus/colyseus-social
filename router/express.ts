@@ -11,13 +11,13 @@ route.get("/facebook", async (req, res) => {
     res.json(user);
 });
 
-route.get("/online_friends", async (req, res) => {
+route.get("/friends", async (req, res) => {
     const user = await User.findOne({ _id: req.params.userId });
     res.json(await getOnlineFriends(user));
 });
 
-route.get("/logout", (req, res) => {
-    logout();
+route.get("/logout", async (req, res) => {
+    await logout(req.params.userId);
     res.json({ success: true });
 });
 
