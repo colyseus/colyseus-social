@@ -15,6 +15,10 @@ describe("User", () => {
 
     after(async () => mongoose.connection.close());
 
+    it("should create brand new user", () => {
+
+    });
+
     it("getOnlineFriends", async () => {
         const defaultUser = await User.findOne({ username: "Open Graph Test User" });
         const friends = await getOnlineFriends(defaultUser);

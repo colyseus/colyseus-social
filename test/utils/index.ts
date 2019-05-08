@@ -15,6 +15,9 @@ export async function resetTestUsers() {
     return await User.deleteMany({});
 }
 
+export async function createFBTestUser() {
+}
+
 export async function getTestUsersAccessTokens() {
     const response: any = (await request({
         url: `https://graph.facebook.com/v3.3/${FB_TEST_APP_ID}/accounts/test-users?access_token=${FB_TEST_APP_TOKEN}`,

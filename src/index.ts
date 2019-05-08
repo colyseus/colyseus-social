@@ -44,32 +44,26 @@ export async function facebookAuth(accessToken: string): Promise<IUser> {
         map(user => user._id);
 
     // find or create user
-    const currentUser = (await User.findOne({ facebookId })) || new User();
-    if (!currentUser.username) {
-        currentUser.username = data.name;
-    }
+    await User.updateOne({ facebookId }, {
+        $setOnInsert: {
+            username: data.name,
+            displayName: data.name,
+            email: data.email,
+        },
+        $set: {
+            avatarUrl: data.picture.data.url,
+            online: true,
+        },
+        $addToSet: {
+            friendIds: friendIds
+        }
+    }, { upsert: true });
 
-    if (!currentUser.displayName) {
-        currentUser.displayName = data.name;
-    }
-
-    if (!currentUser.email) {
-        currentUser.email = data.email;
-    }
-
-    if (!currentUser.avatarUrl) {
-        currentUser.avatarUrl = data.picture.data.url;
-    }
-
-    currentUser.facebookId = facebookId;
-    currentUser.online = true;
-    currentUser.friendIds = friendIds;
-    console.log("currentUser", currentUser);
-    currentUser.save();
+    const currentUser = await User.findOne({ facebookId });
 
     // Add current user to existing users friend list.
-    await Promise.all(friendIds.map((_id) => {
-        return User.updateOne({ _id }, {
+    await Promise.all(facebookFriendsIds.map((facebookId) => {
+        return User.updateOne({ facebookId }, {
             $addToSet: { friendIds: currentUser._id }
         });
     }));
