@@ -2,7 +2,7 @@
 
 Authentication and friend list integration for Colyseus
 
-## Authentication provides
+## Authentication Providers
 
 - Facebook
 
