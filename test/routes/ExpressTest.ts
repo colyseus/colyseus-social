@@ -1,3 +1,4 @@
+import assert from "assert";
 import http from "http";
 import express from "express";
 import phin from "phin";
@@ -22,7 +23,8 @@ describe("Express Routes", () => {
 
     it("shouldn't sign in with invalid access token", async () => {
         const accessToken = "invalid%20token";
-        const data = await request(`/auth/facebook?accessToken=${accessToken}`);
-        console.log("data:", data);
+        const response = await request(`/auth/facebook?accessToken=${accessToken}`);
+        assert.equal(response.statusCode, 401);
+        assert.equal(response.body.error, "Invalid OAuth access token.");
     });
 });
