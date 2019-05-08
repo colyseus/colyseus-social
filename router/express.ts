@@ -18,7 +18,7 @@ declare global {
 
 const jwtMiddleware = jwt({
     secret: JWT_SECRET,
-    userProperty: "auth"
+    userProperty: "auth",
 });
 
 const route = express.Router();
