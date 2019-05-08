@@ -25,8 +25,7 @@
   "homepage": "https://github.com/colyseus/colyseus-facebook#readme",
   "dependencies": {
     "mongoose": "^5.5.6",
-    "phin": "^3.3.0",
-    "reflect-metadata": "^0.1.13"
+    "phin": "^3.3.0"
   },
   "devDependencies": {
     "@types/mocha": "^5.2.6",

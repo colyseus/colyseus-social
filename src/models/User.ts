@@ -18,6 +18,9 @@ export interface IUser extends Document {
 
     friendIDs: string[],
     online: boolean,
+
+    createdAt: Date,
+    updatedAt: Date,
 }
 
 const UserSchema: Schema = new Schema({
@@ -41,7 +44,9 @@ const UserSchema: Schema = new Schema({
     steamID:        { type: String, default: "" },
     friendIDs:      { type: [String], default: [] },
 
-    online:         { type: Boolean, default: true },
+    online:         { type: Boolean, default: true }
+}, {
+    timestamps: true
 });
 
 export default mongoose.model<IUser>('User', UserSchema);

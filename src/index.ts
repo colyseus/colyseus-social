@@ -18,6 +18,11 @@ export async function connect() {
     }
 }
 
+export async function logout(user: IUser) {
+    user.online = false;
+    return user.save();
+}
+
 export async function facebookAuth(accessToken: string): Promise<IUser> {
     const data: any = await request({
         url: `https://graph.facebook.com/me?fields=friends?access_token=${accessToken}`,
