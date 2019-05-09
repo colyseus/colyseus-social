@@ -4,13 +4,14 @@ import assert from "assert";
 import { connectDatabase, sendFriendRequest, getFriendRequests, consumeFriendRequest, ObjectId } from "../src";
 import User from "../src/models/User";
 import FriendRequest from "../src/models/FriendRequest";
-import { resetTestUsers } from "./utils";
+import { clearTestUsers, clearFriendRequests } from "./utils";
 
 describe("FriendRequest", () => {
     before(async () => {
         // connect & clear database.
         await connectDatabase();
-        await resetTestUsers();
+        await clearTestUsers();
+        await clearFriendRequests();
 
         // create dummy users
         await User.create([

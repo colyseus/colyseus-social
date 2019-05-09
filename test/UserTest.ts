@@ -3,14 +3,14 @@ import assert from "assert";
 
 import { connectDatabase, getOnlineFriends, logout, facebookAuth } from "../src";
 import User, { IUser } from "../src/models/User";
-import { resetTestUsers, createFacebookTestUsers, getTestUsersAccessTokens } from "./utils";
+import { clearTestUsers, createFacebookTestUsers, getTestUsersAccessTokens } from "./utils";
 import { getFacebookUser } from "../src/facebook";
 
 describe("User", () => {
     before(async () => {
         // connect & clear database.
         await connectDatabase();
-        await resetTestUsers();
+        await clearTestUsers();
         await createFacebookTestUsers();
     });
 

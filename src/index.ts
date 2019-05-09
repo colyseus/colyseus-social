@@ -74,12 +74,22 @@ export async function facebookAuth(accessToken: string): Promise<IUser> {
 }
 
 export async function sendFriendRequest(senderId: ObjectId, receiverId: ObjectId) {
-    return await FriendRequest.updateOne({
-        sender: senderId,
-        receiver: receiverId
-    }, {}, {
-        upsert: true
+    const isAllowedToSend = await User.findOne({
+        _id: receiverId,
+        blockedUserIds: { $nin: [senderId] }
     });
+
+    if (isAllowedToSend !== null) {
+        return await FriendRequest.updateOne({
+            sender: senderId,
+            receiver: receiverId
+        }, {}, {
+            upsert: true
+        });
+
+    } else {
+        return false;
+    }
 }
 
 export async function consumeFriendRequest(friendRequest: IFriendRequest, accept: boolean = true) {
@@ -90,7 +100,18 @@ export async function consumeFriendRequest(friendRequest: IFriendRequest, accept
     await friendRequest.remove();
 }
 
-export async function getFriendRequests(userId: string): Promise<IFriendRequest[]> {
+export async function blockUser(userId: ObjectId, blockedUserId: ObjectId) {
+    await User.updateOne({ _id: userId }, {
+        $addToSet: { blockedUserIds: blockedUserId },
+        $pull: { friendIds: blockedUserId }
+    });
+    await User.updateOne({ _id: blockedUserId }, {
+        $pull: { friendIds: userId }
+    });
+    await FriendRequest.deleteOne({ sender: blockedUserId, receiver: userId });
+}
+
+export async function getFriendRequests(userId: ObjectId): Promise<IFriendRequest[]> {
     return await FriendRequest.find({ receiver: userId });
 }
 

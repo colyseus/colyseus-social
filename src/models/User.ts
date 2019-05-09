@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { ObjectId } from '..';
 
 export interface IUser extends Document {
     username: string,
@@ -16,8 +17,8 @@ export interface IUser extends Document {
     gameCenterId: string,
     steamId: string,
 
-    friendIds: string[],
-    blockedUserIds: string[],
+    friendIds: ObjectId[],
+    blockedUserIds: ObjectId[],
     online: boolean,
 
     createdAt: Date,
