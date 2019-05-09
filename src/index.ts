@@ -4,8 +4,11 @@ import { getFacebookUser } from "./facebook";
 
 import { MONGO_URI } from "./env";
 import { MongoError } from "mongodb";
+import FriendRequest, { IFriendRequest } from "./models/FriendRequest";
 
 const debug = require('debug')('@colyseus/social');
+
+export type ObjectId = string | mongoose.Schema.Types.ObjectId;
 
 export async function connectDatabase(cb?: (err: MongoError) => void) {
     // skip if already connecting or connected.
@@ -23,10 +26,6 @@ export async function connectDatabase(cb?: (err: MongoError) => void) {
     } catch (e) {
         console.error('Error connecting to database: ', e);
     }
-}
-
-export async function logout(userId: string | mongoose.Schema.Types.ObjectId) {
-    return await User.updateOne({ _id: userId }, { $set: { online: false } });
 }
 
 export async function facebookAuth(accessToken: string): Promise<IUser> {
@@ -74,9 +73,34 @@ export async function facebookAuth(accessToken: string): Promise<IUser> {
     return currentUser;
 }
 
+export async function sendFriendRequest(senderId: ObjectId, receiverId: ObjectId) {
+    return await FriendRequest.updateOne({
+        sender: senderId,
+        receiver: receiverId
+    }, {}, {
+        upsert: true
+    });
+}
+
+export async function consumeFriendRequest(friendRequest: IFriendRequest, accept: boolean = true) {
+    if (accept) {
+        await User.updateOne({ _id: friendRequest.receiver }, { $addToSet: { friendIds: friendRequest.sender } });
+        await User.updateOne({ _id: friendRequest.sender }, { $addToSet: { friendIds: friendRequest.receiver } });
+    }
+    await friendRequest.remove();
+}
+
+export async function getFriendRequests(userId: string): Promise<IFriendRequest[]> {
+    return await FriendRequest.find({ receiver: userId });
+}
+
 export async function getOnlineFriends(
     user: IUser,
     fields: Array<keyof IUser> = ['_id', 'username', 'displayName', 'avatarUrl'],
 ) {
     return await User.find({ _id: { $in: user.friendIds }, online: true }, fields);
+}
+
+export async function logout(userId: string | mongoose.Schema.Types.ObjectId) {
+    return await User.updateOne({ _id: userId }, { $set: { online: false } });
 }

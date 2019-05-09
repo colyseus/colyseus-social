@@ -1,6 +1,7 @@
 import assert from "assert";
 import http from "http";
 import express from "express";
+import mongoose from "mongoose";
 import phin from "phin";
 
 import authRoutes from "../../router/express";
@@ -21,7 +22,11 @@ describe("Express", () => {
             server = app.listen(TESTPORT, done);
         });
     });
-    after(() => server.close());
+
+    after(() => {
+        server.close();
+        mongoose.connection.close();
+    });
 
     // 'request' utility
     const request = async (url: string, headers?: any) => await phin({

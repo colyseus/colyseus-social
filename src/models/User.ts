@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { ObjectID } from 'bson';
 
 export interface IUser extends Document {
     username: string,
@@ -18,6 +17,7 @@ export interface IUser extends Document {
     steamId: string,
 
     friendIds: string[],
+    blockedUserIds: string[],
     online: boolean,
 
     createdAt: Date,
@@ -43,11 +43,16 @@ const UserSchema: Schema = new Schema<IUser>({
     googleId:       { type: String, default: "" },
     gameCenterId:   { type: String, default: "" },
     steamId:        { type: String, default: "" },
+
     friendIds:      { type: [Schema.Types.ObjectId], default: [] },
+    blockedUserIds: { type: [Schema.Types.ObjectId], default: [] },
 
     online:         { type: Boolean, default: true }
 }, {
     timestamps: true
 });
+
+// TODO:
+// UserSchema.indexes
 
 export default mongoose.model<IUser>('User', UserSchema);
