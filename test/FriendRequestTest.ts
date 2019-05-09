@@ -96,7 +96,7 @@ describe("FriendRequest", () => {
         // katarina blocks jack
         await blockUser(katarina._id, jake._id);
 
-        const friendRequest = await FriendRequest.findOne({ sender: jake._id, receiver: katarina._id });
+        let friendRequest = await FriendRequest.findOne({ sender: jake._id, receiver: katarina._id });
         assert.equal(friendRequest, null);
 
         // assert lack of presence in `friendIds` array.
@@ -108,6 +108,11 @@ describe("FriendRequest", () => {
         // assert presence in `blockedUserIds` array.
         assert.ok(!includes(jake.blockedUserIds, katarina._id));
         assert.ok(includes(katarina.blockedUserIds, jake._id));
+
+        // further friend requests should be ignored.
+        await sendFriendRequest(jake._id, katarina._id);
+        friendRequest = await FriendRequest.findOne({ sender: jake._id, receiver: katarina._id });
+        assert.equal(friendRequest, null);
     });
 
 });
