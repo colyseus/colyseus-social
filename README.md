@@ -23,7 +23,7 @@ Authentication and friend list integration for Colyseus
 
 ## TODO's
 
-- Friend request notification
+- Friend request notification (https://github.com/appfeel/node-pushnotifications)
     - On mobile
     - In the browser
 
