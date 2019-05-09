@@ -1,7 +1,7 @@
-import express from "express";
+import express, { Response } from "express";
 import jwt from "express-jwt";
 
-import { facebookAuth, getOnlineFriends, logout } from "../src";
+import { facebookAuth, getOnlineFriends, logout, sendFriendRequest } from "../src";
 import User from "../src/models/User";
 
 import { JWT_SECRET } from "../src/env";
@@ -13,6 +13,15 @@ declare global {
         export interface Request {
             auth?: AuthDataInToken
         }
+    }
+}
+
+const tryOrErr = async (res: Response, cb: () => void, statusCode: number) => {
+    try {
+        await cb();
+    } catch (e) {
+        res.status(statusCode);
+        res.json({ error: e.message })
     }
 }
 
@@ -33,26 +42,44 @@ const route = express.Router();
 route.use(jwtMiddleware.unless({ path: /\/facebook$/ }));
 
 route.get("/facebook", async (req, res) => {
-    try {
+    tryOrErr(res, async () => {
         const { accessToken } = req.query;
+
+        if (!accessToken) {
+            throw new Error("'accessToken' missing on query string.");
+        }
+
         const user = await facebookAuth(accessToken);
         const token = createToken(user);
         res.json({ ...user.toJSON(), ...token });
-
-    } catch (e) {
-        res.status(401);
-        res.json({ error: e.message })
-    }
+    }, 401);
 });
 
 route.get("/friends", async (req, res) => {
-    const user = await User.findOne({ _id: req.auth._id });
-    res.json(await getOnlineFriends(user));
+    tryOrErr(res, async () => {
+        const user = await User.findOne({ _id: req.auth._id });
+        res.json(await getOnlineFriends(user));
+    }, 500);
+});
+
+route.get("/friend_request", async (req, res) => {
+    tryOrErr(res, async () => {
+        const { userId } = req.query;
+
+        if (!userId) {
+            throw new Error("'userId' missing on query string.");
+        }
+
+        await sendFriendRequest(req.auth._id, req.params.userId);
+        res.json({ success: true });
+    }, 500);
 });
 
 route.get("/logout", async (req, res) => {
-    await logout(req.auth._id);
-    res.json({ success: true });
+    tryOrErr(res, async () => {
+        await logout(req.auth._id);
+        res.json({ success: true });
+    }, 500);
 });
 
 export { jwtMiddleware };

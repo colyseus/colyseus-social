@@ -13,7 +13,7 @@ export type ObjectId = string | mongoose.Schema.Types.ObjectId;
 export async function connectDatabase(cb?: (err: MongoError) => void) {
     // skip if already connecting or connected.
     if (mongoose.connection.readyState !== 0) {
-        cb(null);
+        if (cb) cb(null);
         return;
     }
 
