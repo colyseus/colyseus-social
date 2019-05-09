@@ -1,6 +1,6 @@
 import request from "phin";
 import User, { IUser } from "../../src/models/User";
-import { facebookAuth } from "../../src";
+import { facebookAuth, ObjectId } from "../../src";
 import FriendRequest from "../../src/models/FriendRequest";
 
 const FB_TEST_APP_ID = '353169041992501';
@@ -47,4 +47,8 @@ export async function createFacebookTestUsers () {
     }
 
     return cachedTestUsers;
+}
+
+export function includes(arr: ObjectId[], targetId: ObjectId) {
+    return arr.filter((id: ObjectId) => id.toString() === targetId.toString()).length > 0;
 }

@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 import assert from "assert";
 
-import { connectDatabase, sendFriendRequest, getFriendRequests, consumeFriendRequest, ObjectId } from "../src";
+import { connectDatabase, sendFriendRequest, getFriendRequests, consumeFriendRequest, ObjectId, blockUser } from "../src";
 import User from "../src/models/User";
 import FriendRequest from "../src/models/FriendRequest";
-import { clearTestUsers, clearFriendRequests } from "./utils";
+import { clearTestUsers, clearFriendRequests, includes } from "./utils";
 
 describe("FriendRequest", () => {
     before(async () => {
@@ -53,8 +53,8 @@ describe("FriendRequest", () => {
 
         const sender = await User.findOne({ _id: friendRequest.sender });
         const receiver = await User.findOne({ _id: friendRequest.receiver });
-        assert.ok(sender.friendIds.filter((id: ObjectId) => id.toString() === receiver._id.toString()).length === 1);
-        assert.ok(receiver.friendIds.filter((id: ObjectId) => id.toString() === sender._id.toString()).length === 1);
+        assert.ok(includes(sender.friendIds, receiver._id));
+        assert.ok(includes(receiver.friendIds, sender._id));
     });
 
     it("should decline friend request", async () => {
@@ -70,8 +70,9 @@ describe("FriendRequest", () => {
 
         const sender = await User.findOne({ _id: friendRequest.sender });
         const receiver = await User.findOne({ _id: friendRequest.receiver });
-        assert.ok(sender.friendIds.filter((id: ObjectId) => id.toString() === receiver._id.toString()).length === 0);
-        assert.ok(receiver.friendIds.filter((id: ObjectId) => id.toString() === sender._id.toString()).length === 0);
+
+        assert.ok(!includes(sender.friendIds, receiver._id));
+        assert.ok(!includes(receiver.friendIds, sender._id));
     });
 
     it("shouldn't create multiple friend requests for the same user", async () => {
@@ -85,4 +86,28 @@ describe("FriendRequest", () => {
         const friendRequestCount = await FriendRequest.countDocuments({});
         assert.equal(friendRequestCount, 1);
     });
+
+    it("should allow to block a user", async () => {
+        // jake send friend request to katarina
+        let jake = await User.findOne({ username: "jake" });
+        let katarina = await User.findOne({ username: "katarina" });
+        await sendFriendRequest(jake._id, katarina._id);
+
+        // katarina blocks jack
+        await blockUser(katarina._id, jake._id);
+
+        const friendRequest = await FriendRequest.findOne({ sender: jake._id, receiver: katarina._id });
+        assert.equal(friendRequest, null);
+
+        // assert lack of presence in `friendIds` array.
+        jake = await User.findOne({ username: "jake" });
+        katarina = await User.findOne({ username: "katarina" });
+        assert.ok(!includes(jake.friendIds, katarina._id));
+        assert.ok(!includes(katarina.friendIds, jake._id));
+
+        // assert presence in `blockedUserIds` array.
+        assert.ok(!includes(jake.blockedUserIds, katarina._id));
+        assert.ok(includes(katarina.blockedUserIds, jake._id));
+    });
+
 });

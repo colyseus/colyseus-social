@@ -111,6 +111,13 @@ export async function blockUser(userId: ObjectId, blockedUserId: ObjectId) {
     await FriendRequest.deleteOne({ sender: blockedUserId, receiver: userId });
 }
 
+export async function unblockUser(userId: ObjectId, blockedUserId: ObjectId) {
+    await User.updateOne({ _id: userId }, {
+        $addToSet: { friendIds: blockedUserId },
+        $pull: { blockedUserIds: blockedUserId }
+    });
+}
+
 export async function getFriendRequests(userId: ObjectId): Promise<IFriendRequest[]> {
     return await FriendRequest.find({ receiver: userId });
 }
