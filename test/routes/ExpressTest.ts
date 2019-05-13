@@ -2,7 +2,12 @@ import assert from "assert";
 import http from "http";
 import express from "express";
 import mongoose from "mongoose";
-import { get, HttpieResponse } from "httpie";
+import {
+    get as getRequest,
+    post as postRequest ,
+    put as putRequest,
+    del as delRequest
+} from "httpie";
 
 import authRoutes from "../../router/express";
 import { getTestUsersAccessTokens } from "../utils";
@@ -28,18 +33,33 @@ describe("Express", () => {
         mongoose.connection.close();
     });
 
-    // 'request' utility
-    const request = async (url: string, headers?: any) => await get(`http://localhost:${TESTPORT}${url}`, {
+    // 'get' utility
+    const get = async (url: string, headers?: any) => await getRequest(`http://localhost:${TESTPORT}${url}`, {
+        headers: { ...headers, 'Accept': 'application/json' }
+    });
+
+    // 'post' utility
+    const post = async (url: string, headers?: any) => await postRequest(`http://localhost:${TESTPORT}${url}`, {
+        headers: { ...headers, 'Accept': 'application/json' }
+    });
+
+    // 'put' utility
+    const put = async (url: string, headers?: any) => await putRequest(`http://localhost:${TESTPORT}${url}`, {
+        headers: { ...headers, 'Accept': 'application/json' }
+    });
+
+    // 'del' utility
+    const del = async (url: string, headers?: any) => await delRequest(`http://localhost:${TESTPORT}${url}`, {
         headers: { ...headers, 'Accept': 'application/json' }
     });
 
     const loginRequest = async (fbAccessToken: string) => {
-        return await request(`/facebook?accessToken=${fbAccessToken}`);
+        return await get(`/facebook?accessToken=${fbAccessToken}`);
     }
 
     it("shouldn't sign in with invalid access token", async () => {
         try {
-            await request(`/facebook?accessToken=invalid%20token`);
+            await get(`/facebook?accessToken=invalid%20token`);
 
         } catch (e) {
             assert.equal(e.statusCode, 401);
@@ -61,7 +81,7 @@ describe("Express", () => {
         const loginResponse = await loginRequest(accessToken);
         const jwt = loginResponse.data.token;
 
-        const logoutResponse = await request(`/logout`, { authorization: "Bearer " + jwt });
+        const logoutResponse = await get(`/logout`, { authorization: "Bearer " + jwt });
         assert.equal(logoutResponse.statusCode, 200);
 
         const user = await User.findOne({ _id: loginResponse.data._id });
@@ -72,7 +92,7 @@ describe("Express", () => {
         const accessToken = (await getTestUsersAccessTokens())[1];
         const jwt = (await loginRequest(accessToken)).data.token;
 
-        const friendsResponse = await request("/online_friends", { authorization: "Bearer " + jwt });
+        const friendsResponse = await get("/online_friends", { authorization: "Bearer " + jwt });
         assert.equal(friendsResponse.statusCode, 200);
 
         const friends = friendsResponse.data;

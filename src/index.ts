@@ -7,6 +7,7 @@ import { MongoError } from "mongodb";
 import FriendRequest, { IFriendRequest } from "./models/FriendRequest";
 
 const debug = require('debug')('@colyseus/social');
+const DEFAULT_USER_FIELDS: Array<keyof IUser> = ['_id', 'username', 'displayName', 'avatarUrl', 'metadata'];
 
 export type ObjectId = string | mongoose.Schema.Types.ObjectId;
 
@@ -87,12 +88,12 @@ export async function sendFriendRequest(senderId: ObjectId, receiverId: ObjectId
     }
 }
 
-export async function consumeFriendRequest(friendRequest: IFriendRequest, accept: boolean = true) {
+export async function consumeFriendRequest(receiverId: ObjectId, senderId: ObjectId, accept: boolean = true) {
     if (accept) {
-        await User.updateOne({ _id: friendRequest.receiver }, { $addToSet: { friendIds: friendRequest.sender } });
-        await User.updateOne({ _id: friendRequest.sender }, { $addToSet: { friendIds: friendRequest.receiver } });
+        await User.updateOne({ _id: receiverId }, { $addToSet: { friendIds: senderId } });
+        await User.updateOne({ _id: senderId }, { $addToSet: { friendIds: receiverId } });
     }
-    await friendRequest.remove();
+    await FriendRequest.remove({ sender: senderId, receiver: receiverId });
 }
 
 export async function blockUser(userId: ObjectId, blockedUserId: ObjectId) {
@@ -117,16 +118,23 @@ export async function getFriendRequests(userId: ObjectId): Promise<IFriendReques
     return await FriendRequest.find({ receiver: userId });
 }
 
+export async function getFriendRequestsProfile(
+    friendRequests: IFriendRequest[],
+    fields: Array<keyof IUser> = DEFAULT_USER_FIELDS,
+) {
+    return await User.find({ _id: { $in: friendRequests.map(request => request.sender) } }, fields);
+}
+
 export async function getFriends(
     user: IUser,
-    fields: Array<keyof IUser> = ['_id', 'username', 'displayName', 'avatarUrl'],
+    fields: Array<keyof IUser> = DEFAULT_USER_FIELDS,
 ) {
     return await User.find({ _id: { $in: user.friendIds } }, fields);
 }
 
 export async function getOnlineFriends(
     user: IUser,
-    fields: Array<keyof IUser> = ['_id', 'username', 'displayName', 'avatarUrl'],
+    fields: Array<keyof IUser> = DEFAULT_USER_FIELDS,
 ) {
     return await User.find({ _id: { $in: user.friendIds }, online: true }, fields);
 }

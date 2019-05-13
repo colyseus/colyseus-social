@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import assert from "assert";
 
-import { connectDatabase, sendFriendRequest, getFriendRequests, consumeFriendRequest, ObjectId, blockUser } from "../src";
+import { connectDatabase, sendFriendRequest, getFriendRequests, consumeFriendRequest, blockUser } from "../src";
 import User from "../src/models/User";
 import FriendRequest from "../src/models/FriendRequest";
 import { clearTestUsers, clearFriendRequests, includes } from "./utils";
@@ -46,7 +46,7 @@ describe("FriendRequest", () => {
 
     it("should accept friend request", async () => {
         const friendRequest = await FriendRequest.findOne({});
-        await consumeFriendRequest(friendRequest);
+        await consumeFriendRequest(friendRequest.receiver, friendRequest.sender);
 
         const removedFriendRequest = await FriendRequest.findOne({ _id: friendRequest._id });
         assert.equal(removedFriendRequest, null);
@@ -63,7 +63,7 @@ describe("FriendRequest", () => {
         await sendFriendRequest(jake._id, katarina._id);
 
         const friendRequest = await FriendRequest.findOne({ sender: jake._id });
-        await consumeFriendRequest(friendRequest, false);
+        await consumeFriendRequest(friendRequest.receiver, friendRequest.sender, false);
 
         const removedFriendRequest = await FriendRequest.findOne({ _id: friendRequest._id });
         assert.equal(removedFriendRequest, null);

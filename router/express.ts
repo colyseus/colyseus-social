@@ -1,7 +1,7 @@
 import express, { Response } from "express";
 import jwt from "express-jwt";
 
-import { facebookAuth, getOnlineFriends, logout, sendFriendRequest, connectDatabase, getFriends } from "../src";
+import { facebookAuth, getOnlineFriends, logout, sendFriendRequest, connectDatabase, getFriends, getFriendRequests, getFriendRequestsProfile, consumeFriendRequest } from "../src";
 import User from "../src/models/User";
 
 import { JWT_SECRET } from "../src/env";
@@ -58,6 +58,35 @@ route.get("/facebook", async (req, res) => {
     }, 401);
 });
 
+route.get("/friend_requests", async (req, res) => {
+    tryOrErr(res, async () => {
+        const requests = await getFriendRequests(req.auth._id);
+        const users = await getFriendRequestsProfile(requests);
+        res.json(users);
+    }, 500);
+});
+
+route.put("/friend_requests", async (req, res) => {
+    tryOrErr(res, async () => {
+        await consumeFriendRequest(req.auth._id, req.params.userId);
+        res.json({ success: true });
+    }, 500);
+});
+
+route.delete("/friend_requests", async (req, res) => {
+    tryOrErr(res, async () => {
+        await consumeFriendRequest(req.auth._id, req.params.userId, false);
+        res.json({ success: true });
+    }, 500);
+});
+
+route.post("/friend_requests", async (req, res) => {
+    tryOrErr(res, async () => {
+        await sendFriendRequest(req.auth._id, req.params.userId);
+        res.json({success: true});
+    }, 500);
+});
+
 route.get("/friends", async (req, res) => {
     tryOrErr(res, async () => {
         const user = await User.findOne({ _id: req.auth._id });
@@ -69,20 +98,6 @@ route.get("/online_friends", async (req, res) => {
     tryOrErr(res, async () => {
         const user = await User.findOne({ _id: req.auth._id });
         res.json(await getOnlineFriends(user));
-    }, 500);
-});
-
-
-route.get("/friend_request", async (req, res) => {
-    tryOrErr(res, async () => {
-        const { userId } = req.query;
-
-        if (!userId) {
-            throw new Error("'userId' missing on query string.");
-        }
-
-        await sendFriendRequest(req.auth._id, req.params.userId);
-        res.json({ success: true });
     }, 500);
 });
 
