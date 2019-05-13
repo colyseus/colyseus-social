@@ -8,5 +8,7 @@ export async function getFacebookUser (accessToken: string) {
         parse: 'json'
     });
 
+    // TODO: paginate through user friends
+
     return req.body;
 }

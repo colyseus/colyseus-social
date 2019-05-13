@@ -1,7 +1,7 @@
 import express, { Response } from "express";
 import jwt from "express-jwt";
 
-import { facebookAuth, getOnlineFriends, logout, sendFriendRequest } from "../src";
+import { facebookAuth, getOnlineFriends, logout, sendFriendRequest, connectDatabase, getFriends } from "../src";
 import User from "../src/models/User";
 
 import { JWT_SECRET } from "../src/env";
@@ -38,6 +38,9 @@ const jwtMiddleware = jwt({
     }
 });
 
+// connect into the database!
+connectDatabase();
+
 const route = express.Router();
 route.use(jwtMiddleware.unless({ path: /\/facebook$/ }));
 
@@ -58,9 +61,17 @@ route.get("/facebook", async (req, res) => {
 route.get("/friends", async (req, res) => {
     tryOrErr(res, async () => {
         const user = await User.findOne({ _id: req.auth._id });
+        res.json(await getFriends(user));
+    }, 500);
+});
+
+route.get("/online_friends", async (req, res) => {
+    tryOrErr(res, async () => {
+        const user = await User.findOne({ _id: req.auth._id });
         res.json(await getOnlineFriends(user));
     }, 500);
 });
+
 
 route.get("/friend_request", async (req, res) => {
     tryOrErr(res, async () => {

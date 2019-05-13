@@ -5,7 +5,7 @@ import { JWT_SECRET } from "./env";
 
 export interface TokenData {
     token: string;
-    expiresIn: number;
+    // expiresIn: number;
 }
 
 export interface AuthDataInToken {
@@ -13,11 +13,13 @@ export interface AuthDataInToken {
 }
 
 export function createToken(user: IUser): TokenData {
-    const expiresIn = 60 * 60; // an hour
-    const data = { _id: user._id };
+    return { token: jwt.sign({ _id: user._id }, JWT_SECRET) };
 
-    return {
-        expiresIn,
-        token: jwt.sign(data, JWT_SECRET, { expiresIn })
-    };
+    // const expiresIn = 60 * 60; // an hour
+    // const data = { _id: user._id };
+
+    // return {
+    //     expiresIn,
+    //     token: jwt.sign(data, JWT_SECRET, { expiresIn })
+    // };
 }

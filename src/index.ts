@@ -122,6 +122,13 @@ export async function getFriendRequests(userId: ObjectId): Promise<IFriendReques
     return await FriendRequest.find({ receiver: userId });
 }
 
+export async function getFriends(
+    user: IUser,
+    fields: Array<keyof IUser> = ['_id', 'username', 'displayName', 'avatarUrl'],
+) {
+    return await User.find({ _id: { $in: user.friendIds } }, fields);
+}
+
 export async function getOnlineFriends(
     user: IUser,
     fields: Array<keyof IUser> = ['_id', 'username', 'displayName', 'avatarUrl'],

@@ -71,7 +71,7 @@ describe("Express", () => {
         const accessToken = (await getTestUsersAccessTokens())[1];
         const jwt = (await loginRequest(accessToken)).body.token;
 
-        const friendsResponse = await request("/friends", { authorization: "Bearer " + jwt });
+        const friendsResponse = await request("/online_friends", { authorization: "Bearer " + jwt });
         assert.equal(friendsResponse.statusCode, 200);
 
         const friends = friendsResponse.body;
