@@ -1,5 +1,5 @@
 /**
- * Browser / React Native / Client
+ * Browser / React Native
  */
 
 export async function facebookAuth (accessToken: string) {

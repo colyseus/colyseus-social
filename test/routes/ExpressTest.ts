@@ -2,7 +2,7 @@ import assert from "assert";
 import http from "http";
 import express from "express";
 import mongoose from "mongoose";
-import phin from "phin";
+import { get, HttpieResponse } from "httpie";
 
 import authRoutes from "../../router/express";
 import { getTestUsersAccessTokens } from "../utils";
@@ -29,10 +29,8 @@ describe("Express", () => {
     });
 
     // 'request' utility
-    const request = async (url: string, headers?: any) => await phin({
-        url: `http://localhost:${TESTPORT}${url}`,
-        parse: 'json',
-        headers: headers
+    const request = async (url: string, headers?: any) => await get(`http://localhost:${TESTPORT}${url}`, {
+        headers: { ...headers, 'Accept': 'application/json' }
     });
 
     const loginRequest = async (fbAccessToken: string) => {
@@ -40,10 +38,13 @@ describe("Express", () => {
     }
 
     it("shouldn't sign in with invalid access token", async () => {
-        const accessToken = "invalid%20token";
-        const response = await request(`/facebook?accessToken=${accessToken}`);
-        assert.equal(response.statusCode, 401);
-        assert.equal(response.body.error, "Invalid OAuth access token.");
+        try {
+            await request(`/facebook?accessToken=invalid%20token`);
+
+        } catch (e) {
+            assert.equal(e.statusCode, 401);
+            assert.equal(e.data.error, "Invalid OAuth access token.");
+        }
     });
 
     it("should register with valid access token", async () => {
@@ -52,29 +53,29 @@ describe("Express", () => {
 
         const response = await loginRequest(accessToken);
         assert.equal(response.statusCode, 200);
-        assert.equal(response.body.facebookId, facebookData.id);
+        assert.equal(response.data.facebookId, facebookData.id);
     });
 
     it("should logout with access token", async () => {
         const accessToken = (await getTestUsersAccessTokens())[0];
         const loginResponse = await loginRequest(accessToken);
-        const jwt = loginResponse.body.token;
+        const jwt = loginResponse.data.token;
 
         const logoutResponse = await request(`/logout`, { authorization: "Bearer " + jwt });
         assert.equal(logoutResponse.statusCode, 200);
 
-        const user = await User.findOne({ _id: loginResponse.body._id });
+        const user = await User.findOne({ _id: loginResponse.data._id });
         assert.equal(user.online, false);
     });
 
     it("should get a list of online friends", async () => {
         const accessToken = (await getTestUsersAccessTokens())[1];
-        const jwt = (await loginRequest(accessToken)).body.token;
+        const jwt = (await loginRequest(accessToken)).data.token;
 
         const friendsResponse = await request("/online_friends", { authorization: "Bearer " + jwt });
         assert.equal(friendsResponse.statusCode, 200);
 
-        const friends = friendsResponse.body;
+        const friends = friendsResponse.data;
         const friendNames = friends.map(friend => friend.displayName);
         assert.deepEqual(Object.keys(friends[0]), ['username', 'displayName', 'avatarUrl', '_id']);
         assert.ok(friends.length > 0);

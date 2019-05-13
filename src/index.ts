@@ -30,11 +30,6 @@ export async function connectDatabase(cb?: (err: MongoError) => void) {
 
 export async function facebookAuth(accessToken: string): Promise<IUser> {
     const data = await getFacebookUser(accessToken);
-
-    if (data.error) {
-        throw new Error(data.error.message);
-    }
-
     const facebookId = data.id;
 
     // fetch existing users by their facebookId from database

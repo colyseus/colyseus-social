@@ -1,4 +1,4 @@
-import request from "phin";
+import { get } from "httpie";
 import User, { IUser } from "../../src/models/User";
 import { facebookAuth, ObjectId } from "../../src";
 import FriendRequest from "../../src/models/FriendRequest";
@@ -22,10 +22,11 @@ export async function clearFriendRequests() {
 let cachedAccessTokens: string[];
 export async function getTestUsersAccessTokens() {
     if (!cachedAccessTokens) {
-        const response: any = (await request({
-            url: `https://graph.facebook.com/v3.3/${FB_TEST_APP_ID}/accounts/test-users?access_token=${FB_TEST_APP_TOKEN}`,
-            parse: 'json'
-        })).body;
+        const res = (await get(`https://graph.facebook.com/v3.3/${FB_TEST_APP_ID}/accounts/test-users?access_token=${FB_TEST_APP_TOKEN}`, {
+            headers: { 'Accept': 'application/json' }
+        }));
+
+        const response = res.data;
 
         if (response.error) {
             throw new Error(response.error.message);
