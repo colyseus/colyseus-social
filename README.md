@@ -1,6 +1,6 @@
 # @colyseus/social
 
-Authentication and friend list integration for Colyseus
+Authentication and friend list integration for games.
 
 ## Authentication Providers
 
