@@ -20,11 +20,8 @@ const tryOrErr = async (res: Response, cb: () => void, statusCode: number) => {
     try {
         await cb();
     } catch (e) {
-        console.log("CATCH ERROR!", e);
         res.status(statusCode);
-        const message = (e.data && e.data.error && e.data.error.message) || e.message;
-        console.log("MESSAGE:", message);
-        res.json({ error: message })
+        res.json({ error: (e.data && e.data.error && e.data.error.message) || e.message })
     }
 }
 
