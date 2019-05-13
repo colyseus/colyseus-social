@@ -21,6 +21,20 @@ Authentication and friend list integration for games.
 - `TWITTER_CONSUMER_KEY`: App key
 - `TWITTER_CONSUMER_SECRET`: App secret key
 
+## Integration with your Node.js Web Framework
+
+### Express
+
+```typescript
+import express from "express";
+import socialRoutes from "@colyseus/social/routes/express"
+
+const app = express();
+app.use("/", socialRoutes);
+
+app.listen(8080);
+```
+
 ## TODO's
 
 - Friend request notification (https://github.com/appfeel/node-pushnotifications)
