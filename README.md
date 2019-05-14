@@ -51,4 +51,4 @@ app.listen(8080);
 
 ## License
 
-Fair Source 20. (Free until you reach 20 users)
+Colyseus Pro. See [LICENSE](LICENSE) file.
