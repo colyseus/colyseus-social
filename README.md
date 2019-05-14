@@ -1,6 +1,14 @@
 # @colyseus/social
 
-Authentication and friend list integration for games.
+Node.js Authentication and friend list integration for games.
+
+## Features
+
+- Authenticate with Facebook
+- Get list of user's friends
+- Get list of user's online friends
+- Friend requests (send, accept, decline)
+- Block user
 
 ## Authentication Providers
 
@@ -43,4 +51,4 @@ app.listen(8080);
 
 ## License
 
-Colyseus Pro License
+Fair Source 20. (Free until you reach 20 users)
