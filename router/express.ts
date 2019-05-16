@@ -1,7 +1,7 @@
 import express, { Response } from "express";
 import jwt from "express-jwt";
 
-import { facebookAuth, getOnlineFriends, sendFriendRequest, connectDatabase, getFriends, getFriendRequests, getFriendRequestsProfile, consumeFriendRequest, assignDeviceToUser, pingUser } from "../src";
+import { facebookAuth, getOnlineFriends, sendFriendRequest, connectDatabase, getFriends, getFriendRequests, getFriendRequestsProfile, consumeFriendRequest, assignDeviceToUser, pingUser, blockUser, unblockUser } from "../src";
 import User from "../src/models/User";
 
 import { JWT_SECRET } from "../src/env";
@@ -112,6 +112,20 @@ route.get("/online_friends", async (req, res) => {
     tryOrErr(res, async () => {
         const user = await User.findOne({ _id: req.auth._id });
         res.json(await getOnlineFriends(user));
+    }, 500);
+});
+
+route.post("/block", async (req, res) => {
+    tryOrErr(res, async () => {
+        blockUser(req.auth._id, req.query.userId);
+        res.json({ success: true });
+    }, 500);
+});
+
+route.put("/block", async (req, res) => {
+    tryOrErr(res, async () => {
+        unblockUser(req.auth._id, req.query.userId);
+        res.json({ success: true });
     }, 500);
 });
 
