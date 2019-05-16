@@ -1,7 +1,7 @@
 import express, { Response } from "express";
 import jwt from "express-jwt";
 
-import { facebookAuth, getOnlineFriends, logout, sendFriendRequest, connectDatabase, getFriends, getFriendRequests, getFriendRequestsProfile, consumeFriendRequest } from "../src";
+import { facebookAuth, getOnlineFriends, sendFriendRequest, connectDatabase, getFriends, getFriendRequests, getFriendRequestsProfile, consumeFriendRequest, assignDeviceToUser, pingUser } from "../src";
 import User from "../src/models/User";
 
 import { JWT_SECRET } from "../src/env";
@@ -46,15 +46,29 @@ route.use(jwtMiddleware.unless({ path: /\/facebook$/ }));
 
 route.get("/facebook", async (req, res) => {
     tryOrErr(res, async () => {
-        const { accessToken } = req.query;
-
+        const { accessToken, deviceId, platform } = req.query;
         if (!accessToken) {
             throw new Error("'accessToken' missing on query string.");
         }
 
         const user = await facebookAuth(accessToken);
+
+        if (deviceId && platform) {
+            await assignDeviceToUser(user, deviceId, platform);
+        }
+
         const token = createToken(user);
         res.json({ ...user.toJSON(), ...token });
+    }, 401);
+});
+
+route.get("/ping", async (req, res) => {
+    tryOrErr(res, async () => {
+        // TODO: allow to set user status?
+        const { status } = req.query;
+
+        const user = await pingUser(req.auth._id);
+        res.json(user);
     }, 401);
 });
 
@@ -98,13 +112,6 @@ route.get("/online_friends", async (req, res) => {
     tryOrErr(res, async () => {
         const user = await User.findOne({ _id: req.auth._id });
         res.json(await getOnlineFriends(user));
-    }, 500);
-});
-
-route.get("/logout", async (req, res) => {
-    tryOrErr(res, async () => {
-        await logout(req.auth._id);
-        res.json({ success: true });
     }, 500);
 });
 

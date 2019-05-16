@@ -12,6 +12,7 @@ Node.js Authentication and friend list integration for games.
 
 ## Authentication Providers
 
+- Anonymous
 - Facebook
 - Twitter [?]
 

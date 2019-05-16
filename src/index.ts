@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import User, { IUser } from "./models/User";
+import User, { IUser, Platform } from "./models/User";
 import { getFacebookUser } from "./facebook";
 
 import { MONGO_URI } from "./env";
@@ -8,6 +8,7 @@ import FriendRequest, { IFriendRequest } from "./models/FriendRequest";
 
 const debug = require('debug')('@colyseus/social');
 const DEFAULT_USER_FIELDS: Array<keyof IUser> = ['_id', 'username', 'displayName', 'avatarUrl', 'metadata'];
+const ONLINE_SECONDS = 40;
 
 export type ObjectId = string | mongoose.Schema.Types.ObjectId;
 
@@ -27,6 +28,10 @@ export async function connectDatabase(cb?: (err: MongoError) => void) {
     } catch (e) {
         console.error('Error connecting to database: ', e);
     }
+}
+
+export async function pingUser(userId: ObjectId) {
+    await User.updateOne({ _id: userId }, { $set: { updatedAt: Date.now() } });
 }
 
 export async function facebookAuth(accessToken: string): Promise<IUser> {
@@ -67,6 +72,16 @@ export async function facebookAuth(accessToken: string): Promise<IUser> {
     }));
 
     return currentUser;
+}
+
+export async function assignDeviceToUser (user: IUser, deviceId: string, platform: Platform) {
+    const existingDevice = user.devices.filter(device =>
+        device.id === deviceId && device.platform === platform)[0]
+
+    if (!existingDevice) {
+        user.devices.push({ id: deviceId, platform: platform });
+        await user.save();
+    }
 }
 
 export async function sendFriendRequest(senderId: ObjectId, receiverId: ObjectId) {
@@ -136,9 +151,12 @@ export async function getOnlineFriends(
     user: IUser,
     fields: Array<keyof IUser> = DEFAULT_USER_FIELDS,
 ) {
-    return await User.find({ _id: { $in: user.friendIds }, online: true }, fields);
+    return await User.find({
+        _id: { $in: user.friendIds },
+        updatedAt: { $gt: Date.now() - 1000 * ONLINE_SECONDS }
+    }, fields);
 }
 
-export async function logout(userId: string | mongoose.Schema.Types.ObjectId) {
-    return await User.updateOne({ _id: userId }, { $set: { online: false } });
-}
+// export async function logout(userId: string | mongoose.Schema.Types.ObjectId) {
+//     return await User.updateOne({ _id: userId }, { $set: { online: false } });
+// }

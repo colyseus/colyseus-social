@@ -76,18 +76,6 @@ describe("Express", () => {
         assert.equal(response.data.facebookId, facebookData.id);
     });
 
-    it("should logout with access token", async () => {
-        const accessToken = (await getTestUsersAccessTokens())[0];
-        const loginResponse = await loginRequest(accessToken);
-        const jwt = loginResponse.data.token;
-
-        const logoutResponse = await get(`/logout`, { authorization: "Bearer " + jwt });
-        assert.equal(logoutResponse.statusCode, 200);
-
-        const user = await User.findOne({ _id: loginResponse.data._id });
-        assert.equal(user.online, false);
-    });
-
     it("should get a list of online friends", async () => {
         const accessToken = (await getTestUsersAccessTokens())[1];
         const jwt = (await loginRequest(accessToken)).data.token;
