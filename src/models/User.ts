@@ -40,6 +40,13 @@ export interface IUser extends Document {
     updatedAt: Date,
 }
 
+const DeviceSchema = new mongoose.Schema({
+    id: String,
+    platform: String,
+}, {
+    _id: false
+});
+
 const UserSchema: Schema = new Schema<IUser>({
     username:       { type: String, minlength: 3, default: "" },
     displayName:    { type: String, minlength: 3, default: "" },
@@ -54,10 +61,7 @@ const UserSchema: Schema = new Schema<IUser>({
     timezone:       { type: String },
     metadata:       { type: Schema.Types.Mixed },
 
-    devices:        [{
-                        id:       { type: String },
-                        platform: { type: String }, // "ios" | "android"
-                    }],
+    devices:        [ DeviceSchema ],
 
     facebookId:     { type: String },
     twitterId:      { type: String },

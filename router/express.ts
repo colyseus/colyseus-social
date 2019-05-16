@@ -47,12 +47,8 @@ route.use(jwtMiddleware.unless({ path: /\/login$/ }));
 route.post("/login", async (req, res) => {
     tryOrErr(res, async () => {
         const { accessToken, deviceId, platform } = req.query;
-        if (!accessToken) {
-            throw new Error("'accessToken' missing on query string.");
-        }
 
-        const user = await authenticate({ accessToken, deviceId });
-
+        const user = await authenticate({ accessToken, deviceId, platform });
         if (deviceId && platform) {
             await assignDeviceToUser(user, deviceId, platform);
         }

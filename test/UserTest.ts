@@ -11,7 +11,7 @@ describe("User", () => {
         // connect & clear database.
         await connectDatabase();
         await clearTestUsers();
-        await createFacebookTestUsers();
+        // await createFacebookTestUsers();
     });
 
     after(async () => mongoose.connection.close());
@@ -33,6 +33,18 @@ describe("User", () => {
 
         assert.equal(previousUsersCount, await User.countDocuments({}));
         assert.deepEqual(authenticatedUser._id, user._id);
+    });
+
+    it("should allow to login as anonymous", async () => {
+        const anonymous = await authenticate({ deviceId: "device1" });
+        assert.equal(anonymous.isAnonymous, true);
+
+        const sameAnonymous = await authenticate({ deviceId: "device1" });
+        assert.deepEqual(anonymous._id, sameAnonymous._id);
+
+        const secondAnonymous = await authenticate({});
+        assert.equal(secondAnonymous.isAnonymous, true);
+        assert.notDeepEqual(secondAnonymous._id, anonymous._id);
     });
 
     xit("should logout user", async () => {

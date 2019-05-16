@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import nanoid from "nanoid";
 import User, { IUser, Platform } from "./models/User";
 import { getFacebookUser } from "./facebook";
 
@@ -34,9 +35,10 @@ export async function pingUser(userId: ObjectId) {
     await User.updateOne({ _id: userId }, { $set: { updatedAt: Date.now() } });
 }
 
-export async function authenticate({ accessToken, deviceId }: {
+export async function authenticate({ accessToken, deviceId, platform }: {
     accessToken?: string,
-    deviceId?: string
+    deviceId?: string,
+    platform?: string,
 }): Promise<IUser> {
     const $filter: any = {};
     const $set: any = {};
@@ -67,8 +69,11 @@ export async function authenticate({ accessToken, deviceId }: {
         }
 
     } else {
-        // $filter['devices'] = { id: deviceId };
+        if (!deviceId) { deviceId = nanoid(); }
+
+        // $filter['devices'] = { id: deviceId, platform: platform };
         $filter['devices.id'] = deviceId;
+        $filter['devices.platform'] = platform;
 
         // only allow anonymous login if account is not connected with external services
         $filter['facebookId'] = { $exists: false };
