@@ -11,7 +11,7 @@ describe("User", () => {
         // connect & clear database.
         await connectDatabase();
         await clearTestUsers();
-        // await createFacebookTestUsers();
+        await createFacebookTestUsers();
     });
 
     after(async () => mongoose.connection.close());
