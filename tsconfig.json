@@ -6,5 +6,5 @@
     "esModuleInterop": true,
     "experimentalDecorators": true
   },
-  "include": [ "src", "router" ]
+  "include": [ "src", "router", "test" ]
 }

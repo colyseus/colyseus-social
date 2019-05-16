@@ -1,7 +1,7 @@
 import express, { Response } from "express";
 import jwt from "express-jwt";
 
-import { facebookAuth, getOnlineFriends, sendFriendRequest, connectDatabase, getFriends, getFriendRequests, getFriendRequestsProfile, consumeFriendRequest, assignDeviceToUser, pingUser, blockUser, unblockUser } from "../src";
+import { authenticate, getOnlineFriends, sendFriendRequest, connectDatabase, getFriends, getFriendRequests, getFriendRequestsProfile, consumeFriendRequest, assignDeviceToUser, pingUser, blockUser, unblockUser } from "../src";
 import User from "../src/models/User";
 
 import { JWT_SECRET } from "../src/env";
@@ -42,16 +42,16 @@ const jwtMiddleware = jwt({
 connectDatabase();
 
 const route = express.Router();
-route.use(jwtMiddleware.unless({ path: /\/facebook$/ }));
+route.use(jwtMiddleware.unless({ path: /\/login$/ }));
 
-route.get("/facebook", async (req, res) => {
+route.post("/login", async (req, res) => {
     tryOrErr(res, async () => {
         const { accessToken, deviceId, platform } = req.query;
         if (!accessToken) {
             throw new Error("'accessToken' missing on query string.");
         }
 
-        const user = await facebookAuth(accessToken);
+        const user = await authenticate({ accessToken, deviceId });
 
         if (deviceId && platform) {
             await assignDeviceToUser(user, deviceId, platform);

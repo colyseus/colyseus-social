@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import assert from "assert";
 
-import { connectDatabase, getOnlineFriends, facebookAuth } from "../src";
+import { connectDatabase, getOnlineFriends, authenticate } from "../src";
 import User, { IUser } from "../src/models/User";
 import { clearTestUsers, createFacebookTestUsers, getTestUsersAccessTokens } from "./utils";
 import { getFacebookUser } from "../src/facebook";
@@ -29,7 +29,7 @@ describe("User", () => {
         const userData = await getFacebookUser(accessToken);
 
         const user = await User.findOne({ facebookId: userData.id });
-        const authenticatedUser = await facebookAuth(accessToken);
+        const authenticatedUser = await authenticate({ accessToken });
 
         assert.equal(previousUsersCount, await User.countDocuments({}));
         assert.deepEqual(authenticatedUser._id, user._id);

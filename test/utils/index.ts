@@ -1,6 +1,6 @@
 import { get } from "httpie";
 import User, { IUser } from "../../src/models/User";
-import { facebookAuth, ObjectId } from "../../src";
+import { authenticate, ObjectId } from "../../src";
 import FriendRequest from "../../src/models/FriendRequest";
 
 const FB_TEST_APP_ID = '353169041992501';
@@ -42,7 +42,7 @@ export async function createFacebookTestUsers () {
     if (!cachedTestUsers) {
         const accessTokens = await getTestUsersAccessTokens();
         cachedTestUsers = await Promise.all(accessTokens.map((accessToken) => {
-            return facebookAuth(accessToken);
+            return authenticate({ accessToken });
         }));
     }
 

@@ -18,7 +18,7 @@ export function configure(options: ConfigOptions) {
 }
 
 export async function facebookAuth (accessToken: string) {
-    const response = await get(`${config.endpoint}/facebook?accessToken=${accessToken}`, {
+    const response = await get(`${config.endpoint}/login?accessToken=${accessToken}`, {
         headers: { 'Accept': 'application/json' }
     });
 

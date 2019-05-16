@@ -54,12 +54,12 @@ describe("Express", () => {
     });
 
     const loginRequest = async (fbAccessToken: string) => {
-        return await get(`/facebook?accessToken=${fbAccessToken}`);
+        return await post(`/login?accessToken=${fbAccessToken}`);
     }
 
     it("shouldn't sign in with invalid access token", async () => {
         try {
-            await get(`/facebook?accessToken=invalid%20token`);
+            await post(`/login?accessToken=invalid%20token`);
 
         } catch (e) {
             assert.equal(e.statusCode, 401);

@@ -4,7 +4,6 @@ import { ObjectId } from '..';
 export enum Platform {
     ios = "ios",
     android = "android",
-    browser = "browser"
 }
 
 export interface Device {
@@ -29,6 +28,7 @@ export interface IUser extends Document {
     devices: Device[],
 
     facebookId: string,
+    twitterId: string,
     googleId: string,
     gameCenterId: string,
     steamId: string,
@@ -46,12 +46,12 @@ const UserSchema: Schema = new Schema<IUser>({
     avatarUrl:      { type: String, default: "" },
 
     isAnonymous:    { type: Boolean, default: false },
-    email:          { type: String, default: "" },
-    password:       { type: String, default: "" },
+    email:          { type: String },
+    password:       { type: String },
 
-    lang:           { type: String, default: "en" },
-    location:       { type: String, default: "" },
-    timezone:       { type: String, default: "" },
+    lang:           { type: String },
+    location:       { type: String },
+    timezone:       { type: String },
     metadata:       { type: Schema.Types.Mixed },
 
     devices:        [{
@@ -59,10 +59,11 @@ const UserSchema: Schema = new Schema<IUser>({
                         platform: { type: String }, // "ios" | "android"
                     }],
 
-    facebookId:     { type: String, default: "" },
-    googleId:       { type: String, default: "" },
-    gameCenterId:   { type: String, default: "" },
-    steamId:        { type: String, default: "" },
+    facebookId:     { type: String },
+    twitterId:      { type: String },
+    googleId:       { type: String },
+    gameCenterId:   { type: String },
+    steamId:        { type: String },
 
     friendIds:      { type: [Schema.Types.ObjectId], default: [] },
     blockedUserIds: { type: [Schema.Types.ObjectId], default: [] },

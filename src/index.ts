@@ -34,41 +34,67 @@ export async function pingUser(userId: ObjectId) {
     await User.updateOne({ _id: userId }, { $set: { updatedAt: Date.now() } });
 }
 
-export async function facebookAuth(accessToken: string): Promise<IUser> {
-    const data = await getFacebookUser(accessToken);
-    const facebookId = data.id;
+export async function authenticate({ accessToken, deviceId }: {
+    accessToken?: string,
+    deviceId?: string
+}): Promise<IUser> {
+    const $filter: any = {};
+    const $set: any = {};
+    const $setOnInsert: any = {};
 
-    // fetch existing users by their facebookId from database
-    const facebookFriendsIds = data.friends.data.map(friend => friend.id);
-    const friendIds = (facebookFriendsIds.length === 0)
-        ? []
-        : (await User.
-            find({ facebookId: { $in: facebookFriendsIds } }, ["_id"])).
-            map(user => user._id);
+    let friendIds = [];
+    let facebookFriendsIds = [];
+
+    if (accessToken) {
+        const data = await getFacebookUser(accessToken);
+
+        $filter.facebookId = data.id;
+
+        $set.avatarUrl = data.picture.data.url;
+        $set.isAnonymous = false;
+
+        $setOnInsert.username = data.name;
+        $setOnInsert.displayName = data.short_name;
+        $setOnInsert.email = data.email;
+
+        facebookFriendsIds = data.friends.data.map(friend => friend.id);
+
+        // fetch existing users by their facebookId from database
+        if (facebookFriendsIds.length > 0) {
+            friendIds = (await User.
+                find({ facebookId: { $in: facebookFriendsIds } }, ["_id"])).
+                map(user => user._id);
+        }
+
+    } else {
+        // $filter['devices'] = { id: deviceId };
+        $filter['devices.id'] = deviceId;
+
+        // only allow anonymous login if account is not connected with external services
+        $filter['facebookId'] = { $exists: false };
+        $filter['twitterId'] = { $exists: false };
+        $filter['googleId'] = { $exists: false };
+
+        $set.isAnonymous = true;
+    }
 
     // find or create user
-    await User.updateOne({ facebookId }, {
-        $setOnInsert: {
-            username: data.name,
-            displayName: data.short_name,
-            email: data.email,
-        },
-        $set: {
-            avatarUrl: data.picture.data.url,
-        },
-        $addToSet: {
-            friendIds: friendIds
-        }
+    await User.updateOne($filter, {
+        $setOnInsert,
+        $set,
+        $addToSet: { friendIds: friendIds }
     }, { upsert: true });
 
-    const currentUser = await User.findOne({ facebookId });
+    const currentUser = await User.findOne($filter);
 
     // Add current user to existing users friend list.
-    await Promise.all(facebookFriendsIds.map((facebookId) => {
-        return User.updateOne({ facebookId }, {
-            $addToSet: { friendIds: currentUser._id }
-        });
-    }));
+    if (facebookFriendsIds.length > 0) {
+        await Promise.all(facebookFriendsIds.map((facebookId) => {
+            return User.updateOne({ facebookId }, {
+                $addToSet: { friendIds: currentUser._id }
+            });
+        }));
+    }
 
     return currentUser;
 }
