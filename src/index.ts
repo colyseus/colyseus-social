@@ -55,7 +55,6 @@ export async function facebookAuth(accessToken: string): Promise<IUser> {
         },
         $set: {
             avatarUrl: data.picture.data.url,
-            online: true,
         },
         $addToSet: {
             friendIds: friendIds
