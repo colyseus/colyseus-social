@@ -3,7 +3,8 @@ import { ObjectId } from '..';
 
 export enum Platform {
     ios = "ios",
-    android = "android"
+    android = "android",
+    browser = "browser"
 }
 
 export interface Device {

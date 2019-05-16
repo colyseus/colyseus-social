@@ -1,6 +1,8 @@
 import PushNotifications from 'node-pushnotifications';
 import { ContentEncoding } from 'web-push';
 
+// web-push-demo: https://github.com/master-atul/web-push-demo
+
 const settings = {
     // Google Cloud Messasing
     gcm: {
