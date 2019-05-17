@@ -2,6 +2,7 @@ import PushNotifications from 'node-pushnotifications';
 import { ContentEncoding } from 'web-push';
 
 // web-push-demo: https://github.com/master-atul/web-push-demo
+// comprehensive web-push guide: https://pusher.com/tutorials/push-notifications-node-service-workers
 
 const settings = {
     // Google Cloud Messasing
