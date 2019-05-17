@@ -2,7 +2,7 @@
  * Browser / React Native
  */
 
-import { get } from "httpie";
+import { get, post, put, del } from "httpie";
 
 interface ConfigOptions {
     endpoint: string;
@@ -11,14 +11,35 @@ interface ConfigOptions {
 
 const config: Partial<ConfigOptions> = {};
 
+function checkToken() {
+    if (!config.token) {
+        throw new Error("missing token. need to login first.");
+    }
+}
+
 export function configure(options: ConfigOptions) {
     for (let k in options) {
         config[k] = options[k];
     }
 }
 
-export async function facebookAuth (accessToken: string) {
-    const response = await get(`${config.endpoint}/login?accessToken=${accessToken}`, {
+export async function login (options: {
+    accessToken?: string,
+    deviceId?: string,
+    platform?: string,
+    email?: string,
+    password?: string,
+}) {
+    const queryParams: string[] = [];
+    for (const name in options) {
+        queryParams.push(`${name}=${options[name]}`);
+    }
+
+    if (config.token) {
+        queryParams.push(`token=${config.token}`);
+    }
+
+    const response = await post(`${config.endpoint}/login?${queryParams.join("&")}`, {
         headers: { 'Accept': 'application/json' }
     });
 
@@ -31,25 +52,59 @@ export async function facebookAuth (accessToken: string) {
 }
 
 export async function getFriends() {
+    checkToken();
     return (await get(`${config.endpoint}/friends`, {
         headers: { 'Accept': 'application/json' , 'Authorization': 'Bearer ' + config.token }
-    })).data
+    })).data;
 }
 
 export async function getOnlineFriends() {
+    checkToken();
     return (await get(`${config.endpoint}/online_friends`, {
         headers: { 'Accept': 'application/json' , 'Authorization': 'Bearer ' + config.token }
-    })).data
+    })).data;
+}
+
+export async function getFriendRequests(friendId: string) {
+    checkToken();
+    return (await get(`${config.endpoint}/friend_requests`, {
+        headers: {
+            'Accept': 'application/json',
+            'Authorization': 'Bearer ' + config.token
+        }
+    })).data;
 }
 
 export async function sendFriendRequest(friendId: string) {
-    return (await get(`${config.endpoint}/friend_request?userId=${friendId}`, {
-        headers: { 'Accept': 'application/json' , 'Authorization': 'Bearer ' + config.token }
-    })).data
+    checkToken();
+    return (await post(`${config.endpoint}/friend_requests?userId=${friendId}`, {
+        headers: {
+            'Accept': 'application/json',
+            'Authorization': 'Bearer ' + config.token
+        }
+    })).data;
+}
+
+export async function acceptFriendRequest(friendId: string) {
+    checkToken();
+    return (await put(`${config.endpoint}/friend_requests?userId=${friendId}`, {
+        headers: {
+            'Accept': 'application/json',
+            'Authorization': 'Bearer ' + config.token
+        }
+    })).data;
+}
+
+export async function deleteFriendRequest(friendId: string) {
+    checkToken();
+    return (await del(`${config.endpoint}/friend_requests?userId=${friendId}`, {
+        headers: {
+            'Accept': 'application/json',
+            'Authorization': 'Bearer ' + config.token
+        }
+    })).data;
 }
 
 export async function logout() {
-    return (await get(`${config.endpoint}/logout`, {
-        headers: { 'Accept': 'application/json' , 'Authorization': 'Bearer ' + config.token }
-    })).data
+    config.token = undefined;
 }
