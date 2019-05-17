@@ -2,6 +2,8 @@
 
 Node.js Authentication and friend list integration for games.
 
+> This project is not open-source. See [License](#License).
+
 ## Features
 
 - Authenticate with Facebook
@@ -52,4 +54,7 @@ app.listen(8080);
 
 ## License
 
-Colyseus Pro. See [LICENSE](LICENSE) file.
+[Fair Source 100](LICENSE). If you reach 100+ users, please pledge an amount
+you think its fair to my Patreon page:
+
+<a href="https://patreon.com/endel"><img src="https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.herokuapp.com%2Fendel&style=for-the-badge" /></a>
