@@ -47,6 +47,32 @@ describe("User", () => {
         assert.notDeepEqual(secondAnonymous._id, anonymous._id);
     });
 
+    it("should allow to create user by email + password", async () => {
+        const byEmailAndPassword = await authenticate({ email: "dummy@example.com", password: "mypass" });
+        assert.equal(byEmailAndPassword.isAnonymous, false);
+        assert.equal(byEmailAndPassword.email, "dummy@example.com");
+
+        assert.ok(byEmailAndPassword.password);
+        assert.ok(byEmailAndPassword.passwordSalt);
+
+        const loginByEmailAndPassword = await authenticate({ email: "dummy@example.com", password: "mypass" });
+        assert.deepEqual(loginByEmailAndPassword._id, byEmailAndPassword._id);
+    });
+
+    it("should fail to use invalid email + password", async () => {
+        const byEmailAndPassword = await authenticate({ email: "fail@example.com", password: "superpass" });
+        assert.equal(byEmailAndPassword.isAnonymous, false);
+        assert.equal(byEmailAndPassword.email, "fail@example.com");
+
+        await assert.rejects(async () => {
+            await authenticate({ email: "fail@example.com", password: "wrong password!" });
+        }, /invalid credentials/);
+
+        await assert.rejects(async () => {
+            await authenticate({ email: "fail@example.com" });
+        }, /password missing/);
+    });
+
     xit("should logout user", async () => {
         const onlineUser = await User.findOne({ online: true });
         // await logout(onlineUser._id.toString());

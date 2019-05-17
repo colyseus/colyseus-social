@@ -19,6 +19,7 @@ export interface IUser extends Document {
     isAnonymous: boolean,
     email: string,
     password: string,
+    passwordSalt: string,
 
     lang: string,
     location: string,
@@ -55,6 +56,7 @@ const UserSchema: Schema = new Schema<IUser>({
     isAnonymous:    { type: Boolean, default: false },
     email:          { type: String },
     password:       { type: String },
+    passwordSalt:   { type: String },
 
     lang:           { type: String },
     location:       { type: String },

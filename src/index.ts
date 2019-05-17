@@ -6,6 +6,7 @@ import { getFacebookUser } from "./facebook";
 import { MONGO_URI } from "./env";
 import { MongoError } from "mongodb";
 import FriendRequest, { IFriendRequest } from "./models/FriendRequest";
+import { hashPassword, isValidPassword } from "./auth";
 
 const debug = require('debug')('@colyseus/social');
 const DEFAULT_USER_FIELDS: Array<keyof IUser> = ['_id', 'username', 'displayName', 'avatarUrl', 'metadata'];
@@ -32,13 +33,16 @@ export async function connectDatabase(cb?: (err: MongoError) => void) {
 }
 
 export async function pingUser(userId: ObjectId) {
-    await User.updateOne({ _id: userId }, { $set: { updatedAt: Date.now() } });
+    await User.updateOne({ _id: userId }, { $set: { updatedAt: new Date() } });
 }
 
-export async function authenticate({ accessToken, deviceId, platform }: {
+export async function authenticate({ accessToken, deviceId, platform, email, password }: {
     accessToken?: string,
     deviceId?: string,
     platform?: string,
+    email?: string,
+    password?: string,
+
 }): Promise<IUser> {
     const $filter: any = {};
     const $set: any = {};
@@ -48,16 +52,19 @@ export async function authenticate({ accessToken, deviceId, platform }: {
     let facebookFriendsIds = [];
 
     if (accessToken) {
+        // facebook auth
         const data = await getFacebookUser(accessToken);
 
         $filter.facebookId = data.id;
 
-        $set.avatarUrl = data.picture.data.url;
-        $set.isAnonymous = false;
+        $set['avatarUrl'] = data.picture.data.url;
+        $set['isAnonymous'] = false;
 
-        $setOnInsert.username = data.name;
-        $setOnInsert.displayName = data.short_name;
-        $setOnInsert.email = data.email;
+        $setOnInsert['username'] = data.name;
+        $setOnInsert['displayName'] = data.short_name;
+        if (data.email) {
+            $setOnInsert['email'] = data.email;
+        }
 
         facebookFriendsIds = data.friends.data.map(friend => friend.id);
 
@@ -68,7 +75,36 @@ export async function authenticate({ accessToken, deviceId, platform }: {
                 map(user => user._id);
         }
 
+    } else if (email) {
+        // validate password provided
+        if (!password || password.length < 3) {
+            throw new Error("password missing")
+        }
+
+        // email + password auth
+        const existingUser = await User.findOne({ email });
+
+        if (existingUser) {
+            // login via email + password
+            if (isValidPassword(existingUser, password)) {
+                return existingUser;
+
+            } else {
+                throw new Error("invalid credentials");
+            }
+
+        } else {
+            const { salt, hash } = hashPassword(password);
+
+            // create new user with email + password
+            $filter['email'] = email;
+            $set['password'] = hash;
+            $set['passwordSalt'] = salt;
+            $set['isAnonymous'] = false;
+        }
+
     } else {
+        // anonymous auth
         if (!deviceId) { deviceId = nanoid(); }
 
         // $filter['devices'] = { id: deviceId, platform: platform };
@@ -80,7 +116,7 @@ export async function authenticate({ accessToken, deviceId, platform }: {
         $filter['twitterId'] = { $exists: false };
         $filter['googleId'] = { $exists: false };
 
-        $set.isAnonymous = true;
+        $set['isAnonymous'] = true;
     }
 
     // find or create user
@@ -183,7 +219,7 @@ export async function getOnlineFriends(
 ) {
     return await User.find({
         _id: { $in: user.friendIds },
-        updatedAt: { $gt: Date.now() - 1000 * ONLINE_SECONDS }
+        updatedAt: { $gte: Date.now() - 1000 * ONLINE_SECONDS }
     }, fields);
 }
 
