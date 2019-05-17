@@ -46,15 +46,14 @@ route.use(jwtMiddleware.unless({ path: /\/login$/ }));
 
 route.post("/login", async (req, res) => {
     tryOrErr(res, async () => {
-        const { accessToken, deviceId, platform } = req.query;
+        const { accessToken, deviceId, platform, token } = req.query;
 
-        const user = await authenticate({ accessToken, deviceId, platform });
+        const user = await authenticate({ accessToken, deviceId, platform, token });
         if (deviceId && platform) {
             await assignDeviceToUser(user, deviceId, platform);
         }
 
-        const token = createToken(user);
-        res.json({ ...user.toJSON(), ...token });
+        res.json({ ...user.toJSON(), ...createToken(user) });
     }, 401);
 });
 
@@ -65,7 +64,7 @@ route.get("/ping", async (req, res) => {
 
         const user = await pingUser(req.auth._id);
         res.json(user);
-    }, 401);
+    }, 500);
 });
 
 route.get("/friend_requests", async (req, res) => {

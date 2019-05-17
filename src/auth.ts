@@ -41,5 +41,5 @@ export function createToken(user: IUser): TokenData {
 }
 
 export function verifyToken(token: string) {
-    return jwt.verify(token, JWT_SECRET);
+    return jwt.verify(token, JWT_SECRET) as AuthDataInToken;
 }

@@ -5,6 +5,7 @@ import { connectDatabase, getOnlineFriends, authenticate } from "../src";
 import User, { IUser } from "../src/models/User";
 import { clearTestUsers, createFacebookTestUsers, getTestUsersAccessTokens } from "./utils";
 import { getFacebookUser } from "../src/facebook";
+import { createToken } from "../src/auth";
 
 describe("User", () => {
     before(async () => {
@@ -45,6 +46,19 @@ describe("User", () => {
         const secondAnonymous = await authenticate({});
         assert.equal(secondAnonymous.isAnonymous, true);
         assert.notDeepEqual(secondAnonymous._id, anonymous._id);
+    });
+
+    it("should allow to upgrade anonymous user", async() => {
+        const anonymous = await authenticate({ deviceId: "device3" });
+        assert.equal(anonymous.isAnonymous, true);
+
+        const { token } = createToken(anonymous);
+        const upgradeUser = await authenticate({ token, email: "someone@example.com", password: "123456" });
+
+        assert.deepEqual(anonymous._id, upgradeUser._id);
+        assert.equal(upgradeUser.isAnonymous, false);
+        assert.equal(upgradeUser.email, "someone@example.com");
+        assert.deepEqual(upgradeUser.devices[0].id, "device3");
     });
 
     it("should allow to create user by email + password", async () => {

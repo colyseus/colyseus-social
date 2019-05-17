@@ -6,7 +6,7 @@ import { getFacebookUser } from "./facebook";
 import { MONGO_URI } from "./env";
 import { MongoError } from "mongodb";
 import FriendRequest, { IFriendRequest } from "./models/FriendRequest";
-import { hashPassword, isValidPassword } from "./auth";
+import { hashPassword, isValidPassword, verifyToken } from "./auth";
 
 const debug = require('debug')('@colyseus/social');
 const DEFAULT_USER_FIELDS: Array<keyof IUser> = ['_id', 'username', 'displayName', 'avatarUrl', 'metadata'];
@@ -36,12 +36,20 @@ export async function pingUser(userId: ObjectId) {
     await User.updateOne({ _id: userId }, { $set: { updatedAt: new Date() } });
 }
 
-export async function authenticate({ accessToken, deviceId, platform, email, password }: {
+export async function authenticate({
+    accessToken,
+    deviceId,
+    platform,
+    email,
+    password,
+    token
+}: {
     accessToken?: string,
     deviceId?: string,
     platform?: string,
     email?: string,
     password?: string,
+    token?: string,
 
 }): Promise<IUser> {
     const $filter: any = {};
@@ -51,12 +59,15 @@ export async function authenticate({ accessToken, deviceId, platform, email, pas
     let friendIds = [];
     let facebookFriendsIds = [];
 
+    const _id = token && verifyToken(token)._id;
+
     if (accessToken) {
         // facebook auth
         const data = await getFacebookUser(accessToken);
 
-        $filter.facebookId = data.id;
+        $filter['facebookId'] = data.id;
 
+        $set['facebookId'] = data.id; // upgrading from user token
         $set['avatarUrl'] = data.picture.data.url;
         $set['isAnonymous'] = false;
 
@@ -98,6 +109,8 @@ export async function authenticate({ accessToken, deviceId, platform, email, pas
 
             // create new user with email + password
             $filter['email'] = email;
+
+            $set['email'] = email; // upgrading from user token
             $set['password'] = hash;
             $set['passwordSalt'] = salt;
             $set['isAnonymous'] = false;
@@ -116,17 +129,19 @@ export async function authenticate({ accessToken, deviceId, platform, email, pas
         $filter['twitterId'] = { $exists: false };
         $filter['googleId'] = { $exists: false };
 
-        $set['isAnonymous'] = true;
+        $setOnInsert['isAnonymous'] = true;
     }
 
+    const filter = (_id) ? { _id } : $filter;
+
     // find or create user
-    await User.updateOne($filter, {
+    await User.updateOne(filter, {
         $setOnInsert,
         $set,
         $addToSet: { friendIds: friendIds }
     }, { upsert: true });
 
-    const currentUser = await User.findOne($filter);
+    const currentUser = await User.findOne(filter);
 
     // Add current user to existing users friend list.
     if (facebookFriendsIds.length > 0) {
