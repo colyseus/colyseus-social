@@ -32,6 +32,14 @@ Node.js Authentication and friend list integration for games.
 - `TWITTER_CONSUMER_KEY`: App key
 - `TWITTER_CONSUMER_SECRET`: App secret key
 
+### For Push Notifications
+
+- `WEBPUSH_SUBJECT` - mailto: or URL.
+- `WEBPUSH_PUBLIC_KEY` - VAPID Public Key
+- `WEBPUSH_PRIVATE_KEY` - VAPID Private Key
+
+You can generate VAIPD keys using `npx web-push generate-vapid-keys`
+
 ## Integration with your Node.js Web Framework
 
 ### Express

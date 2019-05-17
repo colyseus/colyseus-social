@@ -48,6 +48,7 @@
     "@types/nanoid": "^2.0.0",
     "@types/node-pushnotifications": "^1.0.1",
     "@types/oauth": "^0.9.1",
+    "cors": "^2.8.5",
     "express": "^4.16.4",
     "express-jwt": "^5.3.1",
     "mocha": "^6.1.4",

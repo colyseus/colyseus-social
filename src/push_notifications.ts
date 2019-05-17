@@ -25,9 +25,9 @@ const settings = {
     // Web Push Notifications
     web: {
         vapidDetails: {
-            subject: '< \'mailto\' Address or URL >',
-            publicKey: '< URL Safe Base64 Encoded Public Key >',
-            privateKey: '< URL Safe Base64 Encoded Private Key >',
+            subject: process.env.WEBPUSH_SUBJECT, // '< \'mailto\' Address or URL >'
+            publicKey: process.env.WEBPUSH_PUBLIC_KEY, // '< URL Safe Base64 Encoded Public Key >'
+            privateKey: process.env.WEBPUSH_PRIVATE_KEY, // '< URL Safe Base64 Encoded Private Key >'
         },
         gcmAPIKey: 'gcmkey',
         TTL: 2419200,

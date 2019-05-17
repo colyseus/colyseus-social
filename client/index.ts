@@ -105,6 +105,26 @@ export async function deleteFriendRequest(friendId: string) {
     })).data;
 }
 
+export async function blockUser(friendId: string) {
+    checkToken();
+    return (await post(`${config.endpoint}/block?userId=${friendId}`, {
+        headers: {
+            'Accept': 'application/json',
+            'Authorization': 'Bearer ' + config.token
+        }
+    })).data;
+}
+
+export async function unblockUser(friendId: string) {
+    checkToken();
+    return (await put(`${config.endpoint}/block?userId=${friendId}`, {
+        headers: {
+            'Accept': 'application/json',
+            'Authorization': 'Bearer ' + config.token
+        }
+    })).data;
+}
+
 export async function logout() {
     config.token = undefined;
 }

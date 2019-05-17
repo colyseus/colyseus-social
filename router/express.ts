@@ -6,6 +6,8 @@ import User from "../src/models/User";
 
 import { JWT_SECRET } from "../src/env";
 import { AuthDataInToken, createToken } from "../src/auth";
+import { push } from "../src/push_notifications";
+import WebPushSubscription from "../src/models/WebPushSubscription";
 
 // @types/express-jwt: extends to include "auth" on `req`
 declare global {
@@ -42,7 +44,10 @@ const jwtMiddleware = jwt({
 connectDatabase();
 
 const route = express.Router();
-route.use(jwtMiddleware.unless({ path: /\/login$/ }));
+route.use(express.json());
+
+// route.use(jwtMiddleware.unless({ path: /\/(login)$/ }));
+// route.use(jwtMiddleware.unless({ path: /\/(login)$/ }));
 
 route.post("/login", async (req, res) => {
     tryOrErr(res, async () => {
@@ -120,6 +125,25 @@ route.post("/block", async (req, res) => {
 route.put("/block", async (req, res) => {
     tryOrErr(res, async () => {
         unblockUser(req.auth._id, req.query.userId);
+        res.json({ success: true });
+    }, 500);
+});
+
+
+// expose web push public key
+route.get("/push", async (_, res) => {
+    const subscriptions = await WebPushSubscription.find({});
+    const result = await push.send(subscriptions, {
+        title: "Title, it works!",
+        body: "Hello, body!",
+    });
+    res.json(result);
+});
+
+route.get("/push/web", (_, res) => res.json({ publicKey: process.env.WEBPUSH_PUBLIC_KEY }));
+route.post("/push/subscribe", async (req, res) => {
+    tryOrErr(res, async () => {
+        await WebPushSubscription.create(req.body);
         res.json({ success: true });
     }, 500);
 });
