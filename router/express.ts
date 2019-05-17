@@ -129,8 +129,7 @@ route.put("/block", async (req, res) => {
     }, 500);
 });
 
-
-// expose web push public key
+// send push notifications to all subscribers
 route.get("/push", async (_, res) => {
     const subscriptions = await WebPushSubscription.find({});
     const results: any[] = await push.send(subscriptions, {
@@ -159,7 +158,10 @@ route.get("/push", async (_, res) => {
     res.json({ success, failure });
 });
 
+// expose web push public key
 route.get("/push/web", (_, res) => res.json({ publicKey: process.env.WEBPUSH_PUBLIC_KEY }));
+
+// store user subscription
 route.post("/push/subscribe", async (req, res) => {
     tryOrErr(res, async () => {
         await WebPushSubscription.create(req.body);
