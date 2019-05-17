@@ -133,11 +133,30 @@ route.put("/block", async (req, res) => {
 // expose web push public key
 route.get("/push", async (_, res) => {
     const subscriptions = await WebPushSubscription.find({});
-    const result = await push.send(subscriptions, {
+    const results: any[] = await push.send(subscriptions, {
         title: "Title, it works!",
         body: "Hello, body!",
     });
-    res.json(result);
+
+    let success: number = 0;
+    let failure: number = 0;
+
+    for (let i=0; i<results.length; i++) {
+        success += results[i].success;
+        failure += results[i].failure;
+
+        if (results[i].method === "webPush" && results[i].failure > 0) {
+            const keysFailed = results[i].message.
+                filter(message => message.error).
+                map(message => message.regId.keys.p256dh);
+
+            await WebPushSubscription.deleteMany({
+                'keys.p256dh': { $in: keysFailed }
+            });
+        }
+    }
+
+    res.json({ success, failure });
 });
 
 route.get("/push/web", (_, res) => res.json({ publicKey: process.env.WEBPUSH_PUBLIC_KEY }));
