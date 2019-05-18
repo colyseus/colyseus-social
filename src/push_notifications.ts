@@ -1,6 +1,8 @@
 import PushNotifications from 'node-pushnotifications';
 import { ContentEncoding } from 'web-push';
 
+import WebPushSubscription from './models/WebPushSubscription';
+
 // web-push-demo: https://github.com/master-atul/web-push-demo
 // comprehensive web-push guide: https://pusher.com/tutorials/push-notifications-node-service-workers
 
@@ -54,12 +56,38 @@ const settings = {
 };
 
 
-export const push = new PushNotifications(settings);
+const push = new PushNotifications(settings);
 
 export async function sendNotification(
-    registrationIds: PushNotifications.RegistrationId | PushNotifications.RegistrationId[],
-    data: PushNotifications.Data
+    data: PushNotifications.Data,
+    registrationIds?: PushNotifications.RegistrationId | PushNotifications.RegistrationId[]
 ) {
+    if (!registrationIds) {
+        registrationIds = await WebPushSubscription.find({});
+    }
+
+    const results = await push.send(registrationIds, data);
+
+    let success: number = 0;
+    let failure: number = 0;
+
+    for (let i=0; i<results.length; i++) {
+        success += results[i].success;
+        failure += results[i].failure;
+
+        if (results[i].method === "webPush" && results[i].failure > 0) {
+            const keysFailed = results[i].message.
+                filter(message => message.error).
+                map(message => message.regId.keys.p256dh);
+
+            await WebPushSubscription.deleteMany({
+                'keys.p256dh': { $in: keysFailed }
+            });
+        }
+    }
+
+    return { success, failure };
+
     // const data = {
     //     title: 'New push notification', // REQUIRED for Android
     //     topic: 'topic', // REQUIRED for iOS (apn and gcm)
@@ -117,5 +145,4 @@ export async function sendNotification(
     //     consolidationKey: 'my notification', // ADM
     // };
 
-    await push.send(registrationIds, data);
 }

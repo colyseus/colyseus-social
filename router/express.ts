@@ -6,7 +6,7 @@ import User from "../src/models/User";
 
 import { JWT_SECRET } from "../src/env";
 import { AuthDataInToken, createToken } from "../src/auth";
-import { push } from "../src/push_notifications";
+import { sendNotification } from "../src/push_notifications";
 import WebPushSubscription from "../src/models/WebPushSubscription";
 
 // @types/express-jwt: extends to include "auth" on `req`
@@ -131,31 +131,11 @@ route.put("/block", async (req, res) => {
 
 // send push notifications to all subscribers
 route.get("/push", async (_, res) => {
-    const subscriptions = await WebPushSubscription.find({});
-    const results: any[] = await push.send(subscriptions, {
+    const results = await sendNotification({
         title: "Title, it works!",
         body: "Hello, body!",
     });
-
-    let success: number = 0;
-    let failure: number = 0;
-
-    for (let i=0; i<results.length; i++) {
-        success += results[i].success;
-        failure += results[i].failure;
-
-        if (results[i].method === "webPush" && results[i].failure > 0) {
-            const keysFailed = results[i].message.
-                filter(message => message.error).
-                map(message => message.regId.keys.p256dh);
-
-            await WebPushSubscription.deleteMany({
-                'keys.p256dh': { $in: keysFailed }
-            });
-        }
-    }
-
-    res.json({ success, failure });
+    res.json(results);
 });
 
 // expose web push public key
