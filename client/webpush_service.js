@@ -1,5 +1,4 @@
 const BACKEND_URL = "http://localhost:3000/push";
-const FRONTEND_URL = "http://localhost:8000/";
 
 // urlB64ToUint8Array is a magic function that will encode the base64 public key
 // to Array buffer which is needed by the subscription option
@@ -65,6 +64,8 @@ self.addEventListener("push", function(event) {
 
 
 self.addEventListener('notificationclick', function (event) {
+  const FRONTEND_URL = location.origin;
+
   // Android doesn't close the notification when you click on it
   // See: http://crbug.com/463146
   event.notification.close();
