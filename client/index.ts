@@ -95,7 +95,7 @@ export async function acceptFriendRequest(friendId: string) {
     })).data;
 }
 
-export async function deleteFriendRequest(friendId: string) {
+export async function declineFriendRequest(friendId: string) {
     checkToken();
     return (await del(`${config.endpoint}/friend_requests?userId=${friendId}`, {
         headers: {
