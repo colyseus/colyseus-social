@@ -9,6 +9,7 @@ import FriendRequest, { IFriendRequest } from "./models/FriendRequest";
 import { hashPassword, isValidPassword, verifyToken } from "./auth";
 
 const debug = require('debug')('@colyseus/social');
+
 const DEFAULT_USER_FIELDS: Array<keyof IUser> = ['_id', 'username', 'displayName', 'avatarUrl', 'metadata'];
 const ONLINE_SECONDS = 40;
 
@@ -237,6 +238,15 @@ export async function getOnlineFriends(
         updatedAt: { $gte: Date.now() - 1000 * ONLINE_SECONDS }
     }, fields);
 }
+
+// re-exports
+export {
+    verifyToken,
+    FriendRequest,
+    IFriendRequest,
+    User,
+    IUser
+};
 
 // export async function logout(userId: string | mongoose.Schema.Types.ObjectId) {
 //     return await User.updateOne({ _id: userId }, { $set: { online: false } });
