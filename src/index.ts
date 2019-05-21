@@ -117,7 +117,7 @@ export async function authenticate({
             $set['isAnonymous'] = false;
         }
 
-    } else {
+    } else if (!_id) {
         // anonymous auth
         if (!deviceId) { deviceId = nanoid(); }
 

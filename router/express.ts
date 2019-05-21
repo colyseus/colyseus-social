@@ -1,4 +1,4 @@
-import express, { Response } from "express";
+import express, { Response, Router } from "express";
 import jwt from "express-jwt";
 
 import { authenticate, getOnlineFriends, sendFriendRequest, connectDatabase, getFriends, getFriendRequests, getFriendRequestsProfile, consumeFriendRequest, assignDeviceToUser, pingUser, blockUser, unblockUser } from "../src";
@@ -43,13 +43,10 @@ const jwtMiddleware = jwt({
 // connect into the database!
 connectDatabase();
 
-const route = express.Router();
-route.use(express.json());
+const social = express.Router();
+social.use(jwtMiddleware.unless({ path: /\/login$/ }));
 
-// route.use(jwtMiddleware.unless({ path: /\/(login)$/ }));
-// route.use(jwtMiddleware.unless({ path: /\/(login)$/ }));
-
-route.post("/login", async (req, res) => {
+social.post("/login", async (req, res) => {
     tryOrErr(res, async () => {
         const { accessToken, deviceId, platform, token } = req.query;
 
@@ -62,7 +59,7 @@ route.post("/login", async (req, res) => {
     }, 401);
 });
 
-route.get("/ping", async (req, res) => {
+social.get("/ping", async (req, res) => {
     tryOrErr(res, async () => {
         // TODO: allow to set user status?
         const { status } = req.query;
@@ -72,7 +69,7 @@ route.get("/ping", async (req, res) => {
     }, 500);
 });
 
-route.get("/friend_requests", async (req, res) => {
+social.get("/friend_requests", async (req, res) => {
     tryOrErr(res, async () => {
         const requests = await getFriendRequests(req.auth._id);
         const users = await getFriendRequestsProfile(requests);
@@ -80,57 +77,59 @@ route.get("/friend_requests", async (req, res) => {
     }, 500);
 });
 
-route.put("/friend_requests", async (req, res) => {
+social.put("/friend_requests", async (req, res) => {
     tryOrErr(res, async () => {
         await consumeFriendRequest(req.auth._id, req.params.userId);
         res.json({ success: true });
     }, 500);
 });
 
-route.delete("/friend_requests", async (req, res) => {
+social.delete("/friend_requests", async (req, res) => {
     tryOrErr(res, async () => {
         await consumeFriendRequest(req.auth._id, req.params.userId, false);
         res.json({ success: true });
     }, 500);
 });
 
-route.post("/friend_requests", async (req, res) => {
+social.post("/friend_requests", async (req, res) => {
     tryOrErr(res, async () => {
         await sendFriendRequest(req.auth._id, req.params.userId);
         res.json({success: true});
     }, 500);
 });
 
-route.get("/friends", async (req, res) => {
+social.get("/friends", async (req, res) => {
     tryOrErr(res, async () => {
         const user = await User.findOne({ _id: req.auth._id });
         res.json(await getFriends(user));
     }, 500);
 });
 
-route.get("/online_friends", async (req, res) => {
+social.get("/online_friends", async (req, res) => {
     tryOrErr(res, async () => {
         const user = await User.findOne({ _id: req.auth._id });
         res.json(await getOnlineFriends(user));
     }, 500);
 });
 
-route.post("/block", async (req, res) => {
+social.post("/block", async (req, res) => {
     tryOrErr(res, async () => {
         blockUser(req.auth._id, req.query.userId);
         res.json({ success: true });
     }, 500);
 });
 
-route.put("/block", async (req, res) => {
+social.put("/block", async (req, res) => {
     tryOrErr(res, async () => {
         unblockUser(req.auth._id, req.query.userId);
         res.json({ success: true });
     }, 500);
 });
 
+const push = express.Router();
+
 // send push notifications to all subscribers
-route.get("/push", async (_, res) => {
+push.get("/", async (_, res) => {
     const results = await sendNotification({
         title: "Title, it works!",
         body: "Hello, body!",
@@ -139,15 +138,21 @@ route.get("/push", async (_, res) => {
 });
 
 // expose web push public key
-route.get("/push/web", (_, res) => res.json({ publicKey: process.env.WEBPUSH_PUBLIC_KEY }));
+push.get("/web", (_, res) => res.json({ publicKey: process.env.WEBPUSH_PUBLIC_KEY }));
 
 // store user subscription
-route.post("/push/subscribe", async (req, res) => {
+push.post("/subscribe", async (req, res) => {
     tryOrErr(res, async () => {
         await WebPushSubscription.create(req.body);
         res.json({ success: true });
     }, 500);
 });
 
+
+const routes = express.Router();
+routes.use(express.json());
+routes.use("/", social);
+routes.use("/push", push);
+
 export { jwtMiddleware };
-export default route;
+export default routes;
