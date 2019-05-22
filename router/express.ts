@@ -43,10 +43,11 @@ const jwtMiddleware = jwt({
 // connect into the database!
 connectDatabase();
 
-const social = express.Router();
-social.use(jwtMiddleware.unless({ path: /\/login$/ }));
-
-social.post("/login", async (req, res) => {
+/**
+ * Auth Routes
+ */
+const auth = express.Router();
+auth.post("/", async (req, res) => {
     tryOrErr(res, async () => {
         const { accessToken, deviceId, platform, token } = req.query;
 
@@ -59,7 +60,7 @@ social.post("/login", async (req, res) => {
     }, 401);
 });
 
-social.get("/ping", async (req, res) => {
+auth.get("/", jwtMiddleware, async (req, res) => {
     tryOrErr(res, async () => {
         // TODO: allow to set user status?
         const { status } = req.query;
@@ -69,7 +70,9 @@ social.get("/ping", async (req, res) => {
     }, 500);
 });
 
-social.get("/friend_requests", async (req, res) => {
+const friend = express.Router();
+friend.use(jwtMiddleware);
+friend.get("/requests", async (req, res) => {
     tryOrErr(res, async () => {
         const requests = await getFriendRequests(req.auth._id);
         const users = await getFriendRequestsProfile(requests);
@@ -77,55 +80,58 @@ social.get("/friend_requests", async (req, res) => {
     }, 500);
 });
 
-social.put("/friend_requests", async (req, res) => {
+friend.put("/requests", async (req, res) => {
     tryOrErr(res, async () => {
         await consumeFriendRequest(req.auth._id, req.params.userId);
         res.json({ success: true });
     }, 500);
 });
 
-social.delete("/friend_requests", async (req, res) => {
+friend.delete("/requests", async (req, res) => {
     tryOrErr(res, async () => {
         await consumeFriendRequest(req.auth._id, req.params.userId, false);
         res.json({ success: true });
     }, 500);
 });
 
-social.post("/friend_requests", async (req, res) => {
+friend.post("/requests", async (req, res) => {
     tryOrErr(res, async () => {
         await sendFriendRequest(req.auth._id, req.params.userId);
         res.json({success: true});
     }, 500);
 });
 
-social.get("/friends", async (req, res) => {
+friend.get("/all", async (req, res) => {
     tryOrErr(res, async () => {
         const user = await User.findOne({ _id: req.auth._id });
         res.json(await getFriends(user));
     }, 500);
 });
 
-social.get("/online_friends", async (req, res) => {
+friend.get("/online", async (req, res) => {
     tryOrErr(res, async () => {
         const user = await User.findOne({ _id: req.auth._id });
         res.json(await getOnlineFriends(user));
     }, 500);
 });
 
-social.post("/block", async (req, res) => {
+friend.post("/block", async (req, res) => {
     tryOrErr(res, async () => {
         blockUser(req.auth._id, req.query.userId);
         res.json({ success: true });
     }, 500);
 });
 
-social.put("/block", async (req, res) => {
+friend.put("/block", async (req, res) => {
     tryOrErr(res, async () => {
         unblockUser(req.auth._id, req.query.userId);
         res.json({ success: true });
     }, 500);
 });
 
+/**
+ * Push Notification Routes
+ */
 const push = express.Router();
 
 // send push notifications to all subscribers
@@ -148,11 +154,10 @@ push.post("/subscribe", async (req, res) => {
     }, 500);
 });
 
-
 const routes = express.Router();
-routes.use(express.json());
-routes.use("/", social);
-routes.use("/push", push);
+routes.use("/auth", auth);
+routes.use("/push", express.json(), push);
+routes.use("/friends", friend);
 
 export { jwtMiddleware };
 export default routes;
