@@ -1,7 +1,5 @@
-const BACKEND_URL = "http://localhost:3000/push";
+const BACKEND_URL = "[BACKEND_URL]";
 
-// urlB64ToUint8Array is a magic function that will encode the base64 public key
-// to Array buffer which is needed by the subscription option
 const urlB64ToUint8Array = base64String => {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding)
@@ -34,7 +32,6 @@ const getApplicationServerKey = async () => {
 
 
 self.addEventListener("install", async () => {
-  // This will be called only once when the service worker is installed for first time.
   try {
     const serverKey = await getApplicationServerKey();
     const applicationServerKey = urlB64ToUint8Array(serverKey.publicKey);
@@ -51,12 +48,9 @@ self.addEventListener("push", function(event) {
     const data = event.data.json();
 
     if (Notification.permission === "granted") {
-      // show notification!
+      // show notification
       self.registration.showNotification(data.title, data);
     }
-
-    console.log("Push event!! ", event.data.text());
-
   } else {
     console.log("Push event but no data");
   }

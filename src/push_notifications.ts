@@ -1,3 +1,5 @@
+import fs from "fs";
+
 import PushNotifications from 'node-pushnotifications';
 import { ContentEncoding } from 'web-push';
 
@@ -78,7 +80,10 @@ export async function sendNotification(
         if (results[i].method === "webPush" && results[i].failure > 0) {
             const keysFailed = results[i].message.
                 filter(message => message.error).
-                map(message => message.regId.keys.p256dh);
+                map(message => {
+                    console.error("PUSH ERROR: " + message.error);
+                    return message.regId.keys.p256dh
+                });
 
             await WebPushSubscription.deleteMany({
                 'keys.p256dh': { $in: keysFailed }
@@ -146,3 +151,5 @@ export async function sendNotification(
     // };
 
 }
+
+export const ServiceWorkerScript = fs.readFileSync(__dirname + "/webpush_register.js").toString();

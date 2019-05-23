@@ -6,7 +6,7 @@ import User from "../src/models/User";
 
 import { JWT_SECRET } from "../src/env";
 import { AuthDataInToken, createToken } from "../src/auth";
-import { sendNotification } from "../src/push_notifications";
+import { sendNotification, ServiceWorkerScript } from "../src/push_notifications";
 import WebPushSubscription from "../src/models/WebPushSubscription";
 
 // @types/express-jwt: extends to include "auth" on `req`
@@ -134,8 +134,14 @@ friend.put("/block", async (req, res) => {
  */
 const push = express.Router();
 
+push.get("/", (req, res) => {
+    // TODO: Cache this URL?
+    res.set("Content-Type", "text/javascript");
+    res.send(ServiceWorkerScript.replace("[BACKEND_URL]", req.protocol + '://' + req.get('host') + req.originalUrl));
+});
+
 // send push notifications to all subscribers
-push.get("/", async (_, res) => {
+push.post("/", async (_, res) => {
     const results = await sendNotification({
         title: "Title, it works!",
         body: "Hello, body!",
