@@ -62,8 +62,6 @@ auth.post("/", async (req, res) => {
 
 auth.put("/", jwtMiddleware, express.json(), async (req, res) => {
     tryOrErr(res, async () => {
-        console.log("params: ", req.params);
-        console.log("body: ", req.body);
         res.json({ status: await updateUser(req.auth._id, req.body) });
     }, 500);
 });
