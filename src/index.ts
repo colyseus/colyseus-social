@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import nanoid from "nanoid";
-import User, { IUser, Platform } from "./models/User";
+import User, { IUser, Platform, UserExposedFields } from "./models/User";
 import { getFacebookUser } from "./facebook";
 
 import { MONGO_URI } from "./env";
@@ -11,7 +11,7 @@ import { hashPassword, isValidPassword, verifyToken } from "./auth";
 const debug = require('debug')('@colyseus/social');
 
 const DEFAULT_USER_FIELDS: Array<keyof IUser> = ['_id', 'username', 'displayName', 'avatarUrl', 'metadata'];
-const ONLINE_SECONDS = 40;
+const ONLINE_SECONDS = 20;
 
 export type ObjectId = string | mongoose.Schema.Types.ObjectId;
 
@@ -34,7 +34,7 @@ export async function connectDatabase(cb?: (err: MongoError) => void) {
 }
 
 export async function pingUser(userId: ObjectId) {
-    await User.updateOne({ _id: userId }, { $set: { updatedAt: new Date() } });
+    return (await User.updateOne({ _id: userId }, { $set: { updatedAt: new Date() } })).nModified > 0;
 }
 
 export async function authenticate({
@@ -154,6 +154,17 @@ export async function authenticate({
     }
 
     return currentUser;
+}
+
+export async function updateUser(_id: ObjectId, fields: { [id in keyof IUser]: any }) {
+    const $set: any = {};
+
+    // filter only exposed fields
+    for (const field of UserExposedFields) {
+        if (fields[field]) { $set[field] = fields[field]; }
+    }
+
+    return (await User.updateOne({ _id }, { $set })).nModified > 0;
 }
 
 export async function assignDeviceToUser (user: IUser, deviceId: string, platform: Platform) {

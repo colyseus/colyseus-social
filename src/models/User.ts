@@ -11,6 +11,8 @@ export interface Device {
     platform: Platform
 }
 
+export const UserExposedFields = ['username', 'displayName', 'avatarUrl', 'lang', 'location', 'timezone'];
+
 export interface IUser extends Document {
     username: string,
     displayName: string,

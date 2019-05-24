@@ -4,7 +4,7 @@ process.env.WEBPUSH_PRIVATE_KEY = '7nIUJ1rZ5fcpy_bDHjFWEFHW-HZJ3CMms-G94a9Upsg';
 
 import cors from "cors";
 import express from "express";
-import socialRoutesExpress from "../router/express";
+import socialRoutesExpress from "../express";
 
 const port = 3000;
 const app = express();

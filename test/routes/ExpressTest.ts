@@ -9,7 +9,7 @@ import {
     del as delRequest
 } from "httpie";
 
-import authRoutes from "../../router/express";
+import authRoutes from "../../express";
 import { getTestUsersAccessTokens } from "../utils";
 import { getFacebookUser } from "../../src/facebook";
 import { connectDatabase } from "../../src";

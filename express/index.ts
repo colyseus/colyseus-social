@@ -1,7 +1,7 @@
 import express, { Response, Router } from "express";
 import jwt from "express-jwt";
 
-import { authenticate, getOnlineFriends, sendFriendRequest, connectDatabase, getFriends, getFriendRequests, getFriendRequestsProfile, consumeFriendRequest, assignDeviceToUser, pingUser, blockUser, unblockUser } from "../src";
+import { authenticate, getOnlineFriends, sendFriendRequest, connectDatabase, getFriends, getFriendRequests, getFriendRequestsProfile, consumeFriendRequest, assignDeviceToUser, pingUser, blockUser, unblockUser, updateUser } from "../src";
 import User from "../src/models/User";
 
 import { JWT_SECRET } from "../src/env";
@@ -60,13 +60,20 @@ auth.post("/", async (req, res) => {
     }, 401);
 });
 
+auth.put("/", jwtMiddleware, express.json(), async (req, res) => {
+    tryOrErr(res, async () => {
+        console.log("params: ", req.params);
+        console.log("body: ", req.body);
+        res.json({ status: await updateUser(req.auth._id, req.body) });
+    }, 500);
+});
+
 auth.get("/", jwtMiddleware, async (req, res) => {
     tryOrErr(res, async () => {
         // TODO: allow to set user status?
         const { status } = req.query;
 
-        const user = await pingUser(req.auth._id);
-        res.json(user);
+        res.json({ status: await pingUser(req.auth._id) });
     }, 500);
 });
 
