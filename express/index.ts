@@ -143,7 +143,7 @@ const push = express.Router();
 
 push.get("/", (req, res) => {
     // TODO: Cache this URL?
-    res.set("Content-Type", "text/javascript");
+    res.set("Content-Type", "application/x-javascript");
     res.send(ServiceWorkerScript.replace("[BACKEND_URL]", req.protocol + '://' + req.get('host') + req.originalUrl));
 });
 
