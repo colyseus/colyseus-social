@@ -46,7 +46,7 @@ You can generate VAIPD keys using `npx web-push generate-vapid-keys`
 
 ```typescript
 import express from "express";
-import socialRoutes from "@colyseus/social/routes/express"
+import socialRoutes from "@colyseus/social/express"
 
 const app = express();
 app.use("/", socialRoutes);
