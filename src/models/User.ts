@@ -51,11 +51,11 @@ const DeviceSchema = new mongoose.Schema({
 });
 
 const UserSchema: Schema = new Schema<IUser>({
-    username:       { type: String, minlength: 3, default: "" },
-    displayName:    { type: String, minlength: 3, default: "" },
+    username:       { type: String, default: "" },
+    displayName:    { type: String, default: "" },
     avatarUrl:      { type: String, default: "" },
 
-    isAnonymous:    { type: Boolean, default: false },
+    isAnonymous:    { type: Boolean, default: true },
     email:          { type: String },
     password:       { type: String },
     passwordSalt:   { type: String },
