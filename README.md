@@ -1,7 +1,5 @@
 <div align="center">
-  <a href="https://github.com/colyseus/colyseus">
-    <img src="media/announcement.png?raw=true" />
-  </a>
+  <img src="media/announcement.png?raw=true" />
   <br>
   <br>
   <a href="https://npmjs.com/package/colyseus">
@@ -17,8 +15,8 @@
     <img src="https://img.shields.io/discord/525739117951320081.svg?style=for-the-badge&colorB=7581dc&logo=discord&logoColor=white">
   </a>
   <h3>
-    Authentication and Social features for Colyseus<br />
-    <a href="https://docs.colyseus.io/">View documentation</a>
+    Authentication and Social features for <a href="https://github.com/colyseus/colyseus">Colyseus</a><br />
+    <a href="https://docs.colyseus.io/authentication">View documentation</a>
   </h3>
 </div>
 
