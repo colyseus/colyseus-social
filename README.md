@@ -1,8 +1,6 @@
 # @colyseus/social
 
-Node.js Authentication and friend list integration for games.
-
-> This project is not open-source. See [License](#License).
+Node.js Authentication and friend list integration.
 
 ## Features
 
@@ -16,7 +14,6 @@ Node.js Authentication and friend list integration for games.
 
 - Anonymous
 - Facebook
-- Twitter [?]
 
 ## Environment Variables
 
@@ -26,11 +23,6 @@ Node.js Authentication and friend list integration for games.
 ### For Facebook:
 
 - `FACEBOOK_APP_TOKEN`: Facebook App Token (`"appid|appsecret"`)
-
-### For Twitter:
-
-- `TWITTER_CONSUMER_KEY`: App key
-- `TWITTER_CONSUMER_SECRET`: App secret key
 
 ### For Push Notifications
 
@@ -62,7 +54,6 @@ app.listen(8080);
 
 ## License
 
-[Fair Source 100](LICENSE). If you reach 100+ users, please pledge an amount
-you think its fair to my Patreon page:
+MIT License.
 
 <a href="https://patreon.com/endel"><img src="https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.herokuapp.com%2Fendel&style=for-the-badge" /></a>
