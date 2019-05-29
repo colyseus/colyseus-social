@@ -1,6 +1,6 @@
 {
   "name": "@colyseus/social",
-  "version": "0.10.3",
+  "version": "0.10.4",
   "description": "Authentication and Social features for Colyseus",
   "main": "src/index.js",
   "types": "src/index.d.ts",
@@ -53,11 +53,11 @@
     "express-jwt": "^5.3.1",
     "mocha": "^6.1.4",
     "mongodb": "^3.2.3",
+    "mongoose": "^5.5.6",
     "ts-node": "^8.1.0",
     "typescript": "^3.4.5"
   },
   "peerDependencies": {
-    "mongoose": "^5.5.6",
     "express": "^4.16.4",
     "express-jwt": "^5.3.1"
   }

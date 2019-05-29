@@ -257,6 +257,7 @@ export {
     IFriendRequest,
     User,
     IUser,
+    mongoose
 };
 
 // export async function logout(userId: string | mongoose.Schema.Types.ObjectId) {
