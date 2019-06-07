@@ -51,9 +51,9 @@ connectDatabase();
 const auth = express.Router();
 auth.post("/", async (req, res) => {
     tryOrErr(res, async () => {
-        const { accessToken, deviceId, platform, token } = req.query;
+        const { accessToken, deviceId, platform, token, email, password } = req.query;
 
-        const user = await authenticate({ accessToken, deviceId, platform, token });
+        const user = await authenticate({ accessToken, deviceId, platform, token, email, password });
         if (deviceId && platform) {
             await assignDeviceToUser(user, deviceId, platform);
         }
