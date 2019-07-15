@@ -1,6 +1,6 @@
 {
   "name": "@colyseus/social",
-  "version": "0.10.7",
+  "version": "0.10.8",
   "description": "Authentication and Social features for Colyseus",
   "main": "src/index.js",
   "types": "src/index.d.ts",

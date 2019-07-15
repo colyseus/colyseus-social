@@ -61,6 +61,7 @@ export async function authenticate({
     let facebookFriendsIds = [];
 
     const _id = token && verifyToken(token)._id;
+    let existingUser: IUser;
 
     if (accessToken) {
         // facebook auth
@@ -96,7 +97,7 @@ export async function authenticate({
         }
 
         // email + password auth
-        const existingUser = await User.findOne({ email });
+        existingUser = await User.findOne({ email });
 
         if (existingUser) {
             // login via email + password
@@ -135,7 +136,12 @@ export async function authenticate({
         $setOnInsert['isAnonymous'] = true;
     }
 
-    const filter = (_id) ? { _id } : $filter;
+    // has filters, let's find which user matched to update.
+    if (Object.keys($filter).length > 0) {
+        existingUser = await User.findOne($filter);
+    }
+
+    const filter = (existingUser) ? { _id: existingUser._id } : { _id }
 
     // find or create user
     await User.updateOne(filter, {
