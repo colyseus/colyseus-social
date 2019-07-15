@@ -54,12 +54,12 @@ describe("Express", () => {
     });
 
     const loginRequest = async (fbAccessToken: string) => {
-        return await post(`/login?accessToken=${fbAccessToken}`);
+        return await post(`/auth?accessToken=${fbAccessToken}`);
     }
 
     it("shouldn't sign in with invalid access token", async () => {
         try {
-            await post(`/login?accessToken=invalid%20token`);
+            await post(`/auth?accessToken=invalid%20token`);
 
         } catch (e) {
             assert.equal(e.statusCode, 401);
@@ -80,7 +80,7 @@ describe("Express", () => {
         const accessToken = (await getTestUsersAccessTokens())[1];
         const jwt = (await loginRequest(accessToken)).data.token;
 
-        const friendsResponse = await get("/online_friends", { authorization: "Bearer " + jwt });
+        const friendsResponse = await get("/friends/online", { authorization: "Bearer " + jwt });
         assert.equal(friendsResponse.statusCode, 200);
 
         const friends = friendsResponse.data;

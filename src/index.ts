@@ -78,7 +78,9 @@ export async function authenticate({
             $setOnInsert['email'] = data.email;
         }
 
-        facebookFriendsIds = data.friends.data.map(friend => friend.id);
+        if (data.friends) {
+            facebookFriendsIds = data.friends.data.map(friend => friend.id);
+        }
 
         // fetch existing users by their facebookId from database
         if (facebookFriendsIds.length > 0) {

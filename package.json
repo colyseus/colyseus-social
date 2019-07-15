@@ -1,11 +1,11 @@
 {
   "name": "@colyseus/social",
-  "version": "0.10.6",
+  "version": "0.10.7",
   "description": "Authentication and Social features for Colyseus",
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "scripts": {
-    "clean": "find . -name '*.js' -not -path './node_modules/*' | xargs rm && find . -name '*.d.ts' -not -path './node_modules/*' | xargs rm",
+    "clean": "find . -name '*.js' -not -path './node_modules/*' -not -path './src/webpush_register.js' | xargs rm && find . -name '*.d.ts' -not -path './node_modules/*' | xargs rm",
     "test": "mocha --require ts-node/register test/**Test.ts test/**/*Test.ts --exit",
     "prepublish": "npx tsc"
   },
