@@ -141,7 +141,11 @@ export async function authenticate({
         existingUser = await User.findOne($filter);
     }
 
-    const filter = (existingUser) ? { _id: existingUser._id } : { _id }
+    const filter = (existingUser)
+        ? { _id: existingUser._id }
+        : (_id)
+            ? { _id }
+            : $filter;
 
     // find or create user
     await User.updateOne(filter, {
