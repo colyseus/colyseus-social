@@ -189,6 +189,12 @@ export async function assignDeviceToUser (user: IUser, deviceId: string, platfor
     }
 }
 
+export async function getOnlineUserCount() {
+    return await User.countDocuments({
+        updatedAt: { $gte: Date.now() - 1000 * ONLINE_SECONDS }
+    });
+}
+
 export async function sendFriendRequest(senderId: ObjectId, receiverId: ObjectId) {
     const isAllowedToSend = await User.findOne({
         _id: receiverId,

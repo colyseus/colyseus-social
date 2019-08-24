@@ -1,7 +1,7 @@
 import express, { Response } from "express";
 import jwt from "express-jwt";
 
-import { authenticate, getOnlineFriends, sendFriendRequest, connectDatabase, getFriends, getFriendRequests, getFriendRequestsProfile, consumeFriendRequest, assignDeviceToUser, pingUser, blockUser, unblockUser, updateUser } from "../src";
+import { authenticate, getOnlineFriends, sendFriendRequest, connectDatabase, getFriends, getFriendRequests, getFriendRequestsProfile, consumeFriendRequest, assignDeviceToUser, pingUser, blockUser, unblockUser, updateUser, getOnlineUserCount } from "../src";
 import User from "../src/models/User";
 
 import { JWT_SECRET } from "../src/env";
@@ -74,6 +74,12 @@ auth.get("/", jwtMiddleware, async (req, res) => {
         const { status } = req.query;
 
         res.json({ status: await pingUser(req.cauth._id) });
+    }, 500);
+});
+
+auth.get("/online", jwtMiddleware, async (req, res) => {
+    tryOrErr(res, async () => {
+        res.json({ online: await getOnlineUserCount() });
     }, 500);
 });
 
