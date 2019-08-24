@@ -1,4 +1,4 @@
-import express, { Response, Router } from "express";
+import express, { Response } from "express";
 import jwt from "express-jwt";
 
 import { authenticate, getOnlineFriends, sendFriendRequest, connectDatabase, getFriends, getFriendRequests, getFriendRequestsProfile, consumeFriendRequest, assignDeviceToUser, pingUser, blockUser, unblockUser, updateUser } from "../src";
@@ -13,7 +13,7 @@ import WebPushSubscription from "../src/models/WebPushSubscription";
 declare global {
     namespace Express {
         export interface Request {
-            auth?: AuthDataInToken
+            cauth?: AuthDataInToken
         }
     }
 }
@@ -64,7 +64,7 @@ auth.post("/", async (req, res) => {
 
 auth.put("/", jwtMiddleware, express.json(), async (req, res) => {
     tryOrErr(res, async () => {
-        res.json({ status: await updateUser(req.auth._id, req.body) });
+        res.json({ status: await updateUser(req.cauth._id, req.body) });
     }, 500);
 });
 
@@ -73,7 +73,7 @@ auth.get("/", jwtMiddleware, async (req, res) => {
         // TODO: allow to set user status?
         const { status } = req.query;
 
-        res.json({ status: await pingUser(req.auth._id) });
+        res.json({ status: await pingUser(req.cauth._id) });
     }, 500);
 });
 
@@ -81,7 +81,7 @@ const friend = express.Router();
 friend.use(jwtMiddleware);
 friend.get("/requests", async (req, res) => {
     tryOrErr(res, async () => {
-        const requests = await getFriendRequests(req.auth._id);
+        const requests = await getFriendRequests(req.cauth._id);
         const users = await getFriendRequestsProfile(requests);
         res.json(users);
     }, 500);
@@ -89,49 +89,49 @@ friend.get("/requests", async (req, res) => {
 
 friend.put("/requests", async (req, res) => {
     tryOrErr(res, async () => {
-        await consumeFriendRequest(req.auth._id, req.params.userId);
+        await consumeFriendRequest(req.cauth._id, req.params.userId);
         res.json({ success: true });
     }, 500);
 });
 
 friend.delete("/requests", async (req, res) => {
     tryOrErr(res, async () => {
-        await consumeFriendRequest(req.auth._id, req.params.userId, false);
+        await consumeFriendRequest(req.cauth._id, req.params.userId, false);
         res.json({ success: true });
     }, 500);
 });
 
 friend.post("/requests", async (req, res) => {
     tryOrErr(res, async () => {
-        await sendFriendRequest(req.auth._id, req.params.userId);
+        await sendFriendRequest(req.cauth._id, req.params.userId);
         res.json({success: true});
     }, 500);
 });
 
 friend.get("/all", async (req, res) => {
     tryOrErr(res, async () => {
-        const user = await User.findOne({ _id: req.auth._id });
+        const user = await User.findOne({ _id: req.cauth._id });
         res.json(await getFriends(user));
     }, 500);
 });
 
 friend.get("/online", async (req, res) => {
     tryOrErr(res, async () => {
-        const user = await User.findOne({ _id: req.auth._id });
+        const user = await User.findOne({ _id: req.cauth._id });
         res.json(await getOnlineFriends(user));
     }, 500);
 });
 
 friend.post("/block", async (req, res) => {
     tryOrErr(res, async () => {
-        blockUser(req.auth._id, req.query.userId);
+        blockUser(req.cauth._id, req.query.userId);
         res.json({ success: true });
     }, 500);
 });
 
 friend.put("/block", async (req, res) => {
     tryOrErr(res, async () => {
-        unblockUser(req.auth._id, req.query.userId);
+        unblockUser(req.cauth._id, req.query.userId);
         res.json({ success: true });
     }, 500);
 });
