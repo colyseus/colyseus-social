@@ -95,21 +95,21 @@ friend.get("/requests", async (req, res) => {
 
 friend.put("/requests", async (req, res) => {
     tryOrErr(res, async () => {
-        await consumeFriendRequest(req.cauth._id, req.params.userId);
+        await consumeFriendRequest(req.cauth._id, req.query.userId);
         res.json({ success: true });
     }, 500);
 });
 
 friend.delete("/requests", async (req, res) => {
     tryOrErr(res, async () => {
-        await consumeFriendRequest(req.cauth._id, req.params.userId, false);
+        await consumeFriendRequest(req.cauth._id, req.query.userId, false);
         res.json({ success: true });
     }, 500);
 });
 
 friend.post("/requests", async (req, res) => {
     tryOrErr(res, async () => {
-        await sendFriendRequest(req.cauth._id, req.params.userId);
+        await sendFriendRequest(req.cauth._id, req.query.userId);
         res.json({success: true});
     }, 500);
 });
