@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import assert from "assert";
 
-import { connectDatabase, getOnlineFriends, authenticate } from "../src";
+import { connectDatabase, getOnlineFriends, authenticate, updateUser } from "../src";
 import User, { IUser } from "../src/models/User";
 import { clearTestUsers, createFacebookTestUsers, getTestUsersAccessTokens } from "./utils";
 import { getFacebookUser } from "../src/facebook";
@@ -85,6 +85,16 @@ describe("User", () => {
         await assert.rejects(async () => {
             await authenticate({ email: "fail@example.com" });
         }, /password missing/);
+    });
+
+    it("should not allow to have two users with the same username", async () => {
+        const byEmailAndPassword = await authenticate({ email: "fail@example.com", password: "superpass" });
+        await updateUser(byEmailAndPassword._id, { username: "HelloWorld" });
+
+        const anotherUser = await authenticate({ email: "anotheruser@example.com", password: "superpass" });
+        assert.rejects(async() => {
+            await updateUser(anotherUser._id, { username: "HelloWorld" });
+        }, /taken/);
     });
 
     xit("should logout user", async () => {

@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { ObjectId } from '..';
+import { ObjectId, hooks } from '..';
 
 export enum Platform {
     ios = "ios",
@@ -13,7 +13,7 @@ export interface Device {
 
 export const UserExposedFields = ['username', 'displayName', 'avatarUrl', 'lang', 'location', 'timezone'];
 
-export interface IUser extends Document {
+export interface IUser<T=any> extends Document {
     username: string,
     displayName: string,
     avatarUrl: string,
@@ -26,7 +26,7 @@ export interface IUser extends Document {
     lang: string,
     location: string,
     timezone: string,
-    metadata: any,
+    metadata: T,
 
     devices: Device[],
 
@@ -50,8 +50,8 @@ const DeviceSchema = new mongoose.Schema({
     _id: false
 });
 
-const UserSchema: Schema = new Schema<IUser>({
-    username:       { type: String, default: "" },
+const UserSchema: Schema<IUser> = new Schema<IUser>({
+    username:       { type: String, index: { unique: true, sparse: true } },
     displayName:    { type: String, default: "" },
     avatarUrl:      { type: String, default: "" },
 
@@ -75,11 +75,21 @@ const UserSchema: Schema = new Schema<IUser>({
 
     friendIds:      { type: [Schema.Types.ObjectId], default: [] },
     blockedUserIds: { type: [Schema.Types.ObjectId], default: [] },
+
 }, {
-    timestamps: true
+    timestamps: true,
 });
 
-// TODO:
-// UserSchema.indexes
+/**
+ * Hooks
+ */
+UserSchema.pre<IUser>('save', async function () {
+    const fields = this.modifiedPaths().reduce<Partial<IUser>>((previous, current) => {
+        previous[current] = this.get(current);
+        return previous;
+    }, {});
+
+    await hooks.beforeUserUpdate.invokeAsync(this._id, fields);
+});
 
 export default mongoose.model<IUser>('User', UserSchema);

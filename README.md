@@ -28,6 +28,30 @@
 - Friend requests (send, accept, decline)
 - Block user
 
+## Hooks
+
+```typescript
+import { hooks } from "@colyseus/social";
+
+hooks.beforeAuthenticate((provider, $setOnInsert, $set) => {
+    // assign default metadata upon registration
+    $setOnInsert = {
+        metadata: {
+            coins: 100,
+            trophies: 0
+        }
+    };
+});
+
+hooks.beforeUserUpdate((_id, fields) => {
+    if (fields['username']) {
+        if (fields['username'] === "bad word!") {
+            throw new Error("can't have bad words!");
+        }
+    }
+})
+```
+
 ## Authentication Providers
 
 - Anonymous

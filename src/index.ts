@@ -7,6 +7,7 @@ import { MONGO_URI } from "./env";
 import { MongoError } from "mongodb";
 import FriendRequest, { IFriendRequest } from "./models/FriendRequest";
 import { hashPassword, isValidPassword, verifyToken } from "./auth";
+import { hooks } from "./hooks";
 
 const debug = require('debug')('@colyseus/social');
 
@@ -14,6 +15,7 @@ const DEFAULT_USER_FIELDS: Array<keyof IUser> = ['_id', 'username', 'displayName
 const ONLINE_SECONDS = 20;
 
 export type ObjectId = string | mongoose.Schema.Types.ObjectId;
+export type AuthProvider = 'email' | 'facebook' | 'anonymous';
 
 export async function connectDatabase(cb?: (err: MongoError) => void) {
     // skip if already connecting or connected.
@@ -53,6 +55,8 @@ export async function authenticate({
     token?: string,
 
 }): Promise<IUser> {
+    let provider: AuthProvider;
+
     const $filter: any = {};
     const $set: any = {};
     const $setOnInsert: any = {};
@@ -64,6 +68,8 @@ export async function authenticate({
     let existingUser: IUser;
 
     if (accessToken) {
+        provider = 'facebook';
+
         // facebook auth
         const data = await getFacebookUser(accessToken);
 
@@ -73,8 +79,12 @@ export async function authenticate({
         $set['avatarUrl'] = data.picture.data.url;
         $set['isAnonymous'] = false;
 
-        $setOnInsert['username'] = data.name;
-        $setOnInsert['displayName'] = data.short_name;
+        $setOnInsert['username'] = `${data.short_name}${data.id}`;
+
+        if (data.name) {
+            $setOnInsert['displayName'] = data.name;
+        }
+
         if (data.email) {
             $setOnInsert['email'] = data.email;
         }
@@ -91,6 +101,8 @@ export async function authenticate({
         }
 
     } else if (email) {
+        provider = 'email';
+
         // validate password provided
         if (!password || password.length < 3) {
             throw new Error("password missing")
@@ -121,6 +133,8 @@ export async function authenticate({
         }
 
     } else if (!_id) {
+        provider = 'anonymous';
+
         // anonymous auth
         if (!deviceId) { deviceId = nanoid(); }
 
@@ -135,6 +149,11 @@ export async function authenticate({
 
         $setOnInsert['isAnonymous'] = true;
     }
+
+    /**
+     * allow end-user to modify `$setOnInsert` / `$set` values
+     */
+    hooks.beforeAuthenticate.invoke(provider, $setOnInsert, $set);
 
     // has filters, let's find which user matched to update.
     if (Object.keys($filter).length > 0) {
@@ -168,13 +187,28 @@ export async function authenticate({
     return currentUser;
 }
 
-export async function updateUser(_id: ObjectId, fields: { [id in keyof IUser]: any }) {
+export async function updateUser(_id: ObjectId, fields: Partial<IUser>) {
     const $set: any = {};
 
     // filter only exposed fields
     for (const field of UserExposedFields) {
-        if (fields[field]) { $set[field] = fields[field]; }
+        if (typeof (fields[field]) !== "undefined") {
+            $set[field] = fields[field];
+        }
     }
+
+    /**
+     * default validation: `username` must be unique!
+     */
+    if ($set['username']) {
+        const found = await User.findOne({ username: $set['username'] }, { _id: 1 });
+        if (found && found._id !== _id) {
+            throw new Error("username taken");
+        }
+    }
+
+    // trigger custom before user update
+    await hooks.beforeUserUpdate.invokeAsync(_id, $set);
 
     return (await User.updateOne({ _id }, { $set })).nModified > 0;
 }
@@ -219,7 +253,7 @@ export async function consumeFriendRequest(receiverId: ObjectId, senderId: Objec
         await User.updateOne({ _id: receiverId }, { $addToSet: { friendIds: senderId } });
         await User.updateOne({ _id: senderId }, { $addToSet: { friendIds: receiverId } });
     }
-    await FriendRequest.remove({ sender: senderId, receiver: receiverId });
+    await FriendRequest.deleteOne({ sender: senderId, receiver: receiverId });
 }
 
 export async function blockUser(userId: ObjectId, blockedUserId: ObjectId) {
@@ -275,7 +309,8 @@ export {
     IFriendRequest,
     User,
     IUser,
-    mongoose
+    mongoose,
+    hooks
 };
 
 // export async function logout(userId: string | mongoose.Schema.Types.ObjectId) {
