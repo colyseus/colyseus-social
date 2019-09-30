@@ -82,7 +82,7 @@ export async function sendNotification(
                 filter(message => message.error).
                 map(message => {
                     console.error("PUSH ERROR: " + message.error);
-                    return message.regId.keys.p256dh
+                    return (message.regId as any).keys.p256dh
                 });
 
             await WebPushSubscription.deleteMany({

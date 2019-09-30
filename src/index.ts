@@ -25,7 +25,7 @@ export async function connectDatabase(cb?: (err: MongoError) => void) {
     }
 
     try {
-        await mongoose.connect(MONGO_URI, { autoIndex: false, useNewUrlParser: true }, cb);
+        await mongoose.connect(MONGO_URI, { autoIndex: false, useNewUrlParser: true, useUnifiedTopology: true }, cb);
         debug(`Successfully connected to ${MONGO_URI}`)
 
         // reconnect if disconnected.
