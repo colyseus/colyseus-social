@@ -1,8 +1,9 @@
 import express, { Response } from "express";
 import jwt from "express-jwt";
 
-import { authenticate, getOnlineFriends, sendFriendRequest, connectDatabase, getFriends, getFriendRequests, getFriendRequestsProfile, consumeFriendRequest, assignDeviceToUser, pingUser, blockUser, unblockUser, updateUser, getOnlineUserCount } from "../src";
-import User from "../src/models/User";
+import { authenticate, getOnlineFriends, sendFriendRequest, getFriends, getFriendRequests, getFriendRequestsProfile, consumeFriendRequest, assignDeviceToUser, pingUser, blockUser, unblockUser, updateUser, getOnlineUserCount, IUser } from "../src";
+import { connectDatabase, User } from "../src";
+import * as providers from "../src/providers";
 
 import { JWT_SECRET } from "../src/env";
 import { AuthDataInToken, createToken } from "../src/auth";
@@ -54,11 +55,52 @@ auth.post("/", async (req, res) => {
         const { accessToken, deviceId, platform, token, email, password } = req.query;
 
         const user = await authenticate({ accessToken, deviceId, platform, token, email, password });
+
+        // assign deviceId & platform
         if (deviceId && platform) {
             await assignDeviceToUser(user, deviceId, platform);
         }
 
         res.json({ ...user.toJSON(), ...createToken(user) });
+    }, 401);
+});
+
+auth.get("/callback", (req, res) => {
+    const { grant } = (req as any).session;
+    tryOrErr(res, async () => {
+        const provider = grant.provider;
+        const raw = grant.response.raw;
+
+        // const providerId = raw.user_id;
+        // const displayName = raw.screen_name;
+
+        const options: any = { provider };
+
+        if (providers[provider]) {
+            const data = await providers[provider](raw);
+        }
+        if (provider === "facebook") {
+            options.accessToken = raw.access_token;
+        }
+
+        // const user = await authenticate(options);
+        // res.json({ ...user.toJSON(), ...createToken(user) });
+
+        // TODO: how to handle authentication from a native mobile app?
+
+        res.send(`<html><head>
+            <script type="text/javascript">
+                window.opener.postMessage(${JSON.stringify(raw)}, "*")
+                window.close();
+            </script>
+        </head></html>`);
+
+        // res.json({
+        //     provider,
+        //     response: grant.response
+        // });
+
+
     }, 401);
 });
 

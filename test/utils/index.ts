@@ -1,7 +1,5 @@
 import { get } from "httpie";
-import User, { IUser } from "../../src/models/User";
-import { authenticate, ObjectId } from "../../src";
-import FriendRequest from "../../src/models/FriendRequest";
+import { authenticate, ObjectId, User, IUser, FriendRequest } from "../../src";
 
 const FB_TEST_APP_ID = '353169041992501';
 const FB_TEST_APP_TOKEN = '353169041992501|8d17708d062493030db44dd687b73e97';

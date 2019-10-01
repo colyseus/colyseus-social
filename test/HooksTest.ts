@@ -1,4 +1,4 @@
-import { connectDatabase, hooks, authenticate, updateUser } from "../src";
+import { hooks, authenticate, updateUser, connectDatabase } from "../src";
 import assert from "assert";
 
 describe("User: hooks", () => {

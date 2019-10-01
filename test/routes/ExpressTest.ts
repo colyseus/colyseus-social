@@ -13,7 +13,6 @@ import authRoutes from "../../express";
 import { getTestUsersAccessTokens } from "../utils";
 import { getFacebookUser } from "../../src/facebook";
 import { connectDatabase } from "../../src";
-import User from "../../src/models/User";
 
 describe("Express", () => {
     const TESTPORT = 2267;

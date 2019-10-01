@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 import assert from "assert";
 
-import { connectDatabase, getOnlineFriends, authenticate, updateUser } from "../src";
-import User, { IUser } from "../src/models/User";
+import { getOnlineFriends, authenticate, updateUser } from "../src";
+import { connectDatabase, User } from "../src";
 import { clearTestUsers, createFacebookTestUsers, getTestUsersAccessTokens } from "./utils";
 import { getFacebookUser } from "../src/facebook";
 import { createToken } from "../src/auth";

@@ -1,9 +1,8 @@
 import mongoose from "mongoose";
 import assert from "assert";
 
-import { connectDatabase, sendFriendRequest, getFriendRequests, consumeFriendRequest, blockUser } from "../src";
-import User from "../src/models/User";
-import FriendRequest from "../src/models/FriendRequest";
+import { sendFriendRequest, getFriendRequests, consumeFriendRequest, blockUser } from "../src";
+import { connectDatabase, User, FriendRequest } from "../src";
 import { clearTestUsers, clearFriendRequests, includes } from "./utils";
 
 describe("FriendRequest", () => {

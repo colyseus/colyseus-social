@@ -92,4 +92,4 @@ UserSchema.pre<IUser>('save', async function () {
     await hooks.beforeUserUpdate.invokeAsync(this._id, fields);
 });
 
-export default mongoose.model<IUser>('User', UserSchema);
+export const User = mongoose.model<IUser>('User', UserSchema);

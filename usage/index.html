@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>@colyseus/social</title>
+</head>
+<body>
+    <a href="#" data-provider="twitter">Twitter Sign-in</a>
+    <a href="#" data-provider="google">Google Sign-in</a>
+    <a href="#" data-provider="facebook">Facebook Sign-in</a>
+
+    <script type="text/javascript">
+        window.addEventListener("message", (ev) => {
+            if (ev.origin.indexOf("localhost") !== -1) {
+                console.log(ev.origin, ev.data);
+            }
+        });
+
+        Array.from(document.querySelectorAll('a')).forEach(a => {
+            a.addEventListener("click", (e) => {
+                e.preventDefault();
+
+                window.open(`${location.href}connect/${a.dataset.provider}`, "_blank");
+            });
+        });
+    </script>
+
+</body>
+</html>

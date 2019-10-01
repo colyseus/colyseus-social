@@ -5,7 +5,7 @@ export interface IFriendRequest extends Document {
     receiver: Schema.Types.ObjectId,
 }
 
-const FriendRequest: Schema = new Schema<IFriendRequest>({
+const FriendRequestSchema: Schema = new Schema<IFriendRequest>({
     sender: Schema.Types.ObjectId,
     receiver: Schema.Types.ObjectId,
 }, {
@@ -15,4 +15,4 @@ const FriendRequest: Schema = new Schema<IFriendRequest>({
 // TODO:
 // FriendRequest.indexes
 
-export default mongoose.model<IFriendRequest>('FriendRequest', FriendRequest);
+export const FriendRequest = mongoose.model<IFriendRequest>('FriendRequest', FriendRequestSchema);
