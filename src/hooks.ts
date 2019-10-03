@@ -1,5 +1,5 @@
 import { createSignal } from "strong-events";
-import { ObjectId, IUser, AuthProvider } from ".";
+import { ObjectId, IUser, AuthProvider, OAuthProvider } from ".";
 
 export const hooks = {
     /**
@@ -10,7 +10,12 @@ export const hooks = {
     /**
      * Triggered before updating a user.
      */
-    beforeUserUpdate: createSignal<(_id: ObjectId, fields: Partial<IUser>) => void>()
+    beforeUserUpdate: createSignal<(_id: ObjectId, fields: Partial<IUser>) => void>(),
+
+    /**
+     * Triggered after user accepts OAuth request
+     */
+    onOAuth: createSignal<(provider: OAuthProvider, data: any, raw: any) => void>()
 }
 
 // /**

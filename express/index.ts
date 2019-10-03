@@ -1,7 +1,7 @@
 import express, { Response } from "express";
 import jwt from "express-jwt";
 
-import { authenticate, getOnlineFriends, sendFriendRequest, getFriends, getFriendRequests, getFriendRequestsProfile, consumeFriendRequest, assignDeviceToUser, pingUser, blockUser, unblockUser, updateUser, getOnlineUserCount, IUser } from "../src";
+import { authenticate, getOnlineFriends, sendFriendRequest, getFriends, getFriendRequests, getFriendRequestsProfile, consumeFriendRequest, assignDeviceToUser, pingUser, blockUser, unblockUser, updateUser, getOnlineUserCount, IUser, hooks } from "../src";
 import { connectDatabase, User } from "../src";
 import * as providers from "../src/providers";
 
@@ -76,12 +76,13 @@ auth.get("/callback", (req, res) => {
 
         const options: any = { provider };
 
-        if (providers[provider]) {
-            const data = await providers[provider](raw);
+        if (!providers[provider]) {
+            throw new Error(`"${provider}" not implemented.`);
         }
-        if (provider === "facebook") {
-            options.accessToken = raw.access_token;
-        }
+
+        const data = await providers[provider](raw);
+
+        hooks.onOAuth.invoke(provider, data, raw);
 
         // const user = await authenticate(options);
         // res.json({ ...user.toJSON(), ...createToken(user) });

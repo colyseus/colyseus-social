@@ -4,7 +4,7 @@ import assert from "assert";
 import { getOnlineFriends, authenticate, updateUser } from "../src";
 import { connectDatabase, User } from "../src";
 import { clearTestUsers, createFacebookTestUsers, getTestUsersAccessTokens } from "./utils";
-import { getFacebookUser } from "../src/facebook";
+import { facebook } from "../src/providers";
 import { createToken } from "../src/auth";
 
 describe("User", () => {
@@ -27,10 +27,10 @@ describe("User", () => {
         const accessToken = (await getTestUsersAccessTokens())[0];
 
         const previousUsersCount = await User.countDocuments({});
-        const userData = await getFacebookUser(accessToken);
+        const userData = await facebook(accessToken);
 
         const user = await User.findOne({ facebookId: userData.id });
-        const authenticatedUser = await authenticate({ accessToken });
+        const authenticatedUser = await authenticate({ accessToken: accessToken });
 
         assert.equal(previousUsersCount, await User.countDocuments({}));
         assert.deepEqual(authenticatedUser._id, user._id);
