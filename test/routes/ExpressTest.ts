@@ -11,7 +11,7 @@ import {
 
 import authRoutes from "../../express";
 import { getTestUsersAccessTokens } from "../utils";
-import { getFacebookUser } from "../../src/facebook";
+import { facebook } from "../../src/providers";
 import { connectDatabase } from "../../src";
 
 describe("Express", () => {
@@ -68,7 +68,7 @@ describe("Express", () => {
 
     it("should register with valid access token", async () => {
         const accessToken = (await getTestUsersAccessTokens())[0];
-        const facebookData = await getFacebookUser(accessToken);
+        const facebookData = await facebook({ access_token: accessToken });
 
         const response = await loginRequest(accessToken);
         assert.equal(response.statusCode, 200);
