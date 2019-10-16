@@ -64,7 +64,7 @@ export async function authenticate({
     let friendIds = [];
     let facebookFriendsIds = [];
 
-    const _id = token && verifyToken(token)._id;
+    let _id = token && verifyToken(token)._id;
     let existingUser: IUser;
 
     if (accessToken) {
@@ -130,6 +130,7 @@ export async function authenticate({
             $set['password'] = hash;
             $set['passwordSalt'] = salt;
             $set['isAnonymous'] = false;
+	    _id=null;
         }
 
     } else if (!_id) {
