@@ -3,6 +3,8 @@ import nanoid from "nanoid";
 import User, { IUser, Platform, UserExposedFields } from "./models/User";
 import { getFacebookUser } from "./facebook";
 
+import { validateSignature,getEncodeDataBySignature } from "./facebookInstant";
+
 import { MONGO_URI } from "./env";
 import { MongoError } from "mongodb";
 import FriendRequest, { IFriendRequest } from "./models/FriendRequest";
@@ -16,6 +18,7 @@ const ONLINE_SECONDS = 20;
 
 export type ObjectId = string | mongoose.Schema.Types.ObjectId;
 export type AuthProvider = 'email' | 'facebook' | 'anonymous' | 'FBInstant';
+
 
 export async function connectDatabase(cb?: (err: MongoError) => void) {
     // skip if already connecting or connected.
@@ -76,13 +79,13 @@ export async function authenticate({
         $filter['twitterId'] = { $exists: false };
         $filter['googleId'] = { $exists: false };
         $filter['devices.platform'] = provider;
-        _id=null;
-
-        
-        if(signature!="test"){
-             throw new Error("signature missing")
+        let isVaildate = await validateSignature(signature)
+        if(!isVaildate){
+             throw new Error("signature vaildate fail")
         }
-
+        let data = await getEncodeDataBySignature(signature);
+        $filter['facebookId'] = data.player_id;
+        _id=null;
     }else if (accessToken) {
         provider = 'facebook';
 

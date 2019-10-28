@@ -1,6 +1,6 @@
 {
   "name": "@leonhe/colyseus-social",
-  "version": "0.11.5",
+  "version": "0.11.8",
   "description": "Authentication and Social features for Colyseus",
   "main": "src/index.js",
   "types": "src/index.d.ts",
@@ -37,6 +37,7 @@
   "dependencies": {
     "@types/crypto-js": "^3.1.43",
     "@types/mongoose": "^5.3.27",
+    "crypto-js": "^3.1.9-1",
     "debug": "^4.1.1",
     "httpie": "^1.1.2",
     "jsonwebtoken": "^8.5.1",
