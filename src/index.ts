@@ -15,7 +15,7 @@ const DEFAULT_USER_FIELDS: Array<keyof IUser> = ['_id', 'username', 'displayName
 const ONLINE_SECONDS = 20;
 
 export type ObjectId = string | mongoose.Schema.Types.ObjectId;
-export type AuthProvider = 'email' | 'facebook' | 'anonymous';
+export type AuthProvider = 'email' | 'facebook' | 'anonymous' | 'FBInstant';
 
 export async function connectDatabase(cb?: (err: MongoError) => void) {
     // skip if already connecting or connected.
@@ -45,7 +45,8 @@ export async function authenticate({
     platform,
     email,
     password,
-    token
+    token,
+    signature
 }: {
     accessToken?: string,
     deviceId?: string,
@@ -53,7 +54,7 @@ export async function authenticate({
     email?: string,
     password?: string,
     token?: string,
-
+    signature?:string,
 }): Promise<IUser> {
     let provider: AuthProvider;
 
@@ -67,7 +68,22 @@ export async function authenticate({
     let _id = token && verifyToken(token)._id;
     let existingUser: IUser;
 
-    if (accessToken) {
+    if(signature)
+    {
+        provider = 'FBInstant';
+        $set['isAnonymous'] = false;
+        $filter['facebookId'] = { $exists: false };
+        $filter['twitterId'] = { $exists: false };
+        $filter['googleId'] = { $exists: false };
+        $filter['devices.platform'] = provider;
+        _id=null;
+
+        
+        if(signature!="test"){
+             throw new Error("signature missing")
+        }
+
+    }else if (accessToken) {
         provider = 'facebook';
 
         // facebook auth

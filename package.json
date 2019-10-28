@@ -1,5 +1,5 @@
 {
-  "name": "@colyseus/social",
+  "name": "colyseus-social",
   "version": "0.11.5",
   "description": "Authentication and Social features for Colyseus",
   "main": "src/index.js",
@@ -16,7 +16,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/colyseus/colyseus-social.git"
+    "url": "git+ssh://git@github.com/leonhe/colyseus-social.gitN"
   },
   "keywords": [
     "colyseus",
@@ -30,6 +30,8 @@
   "bugs": {
     "url": "https://github.com/colyseus/colyseus-social/issues"
   },
+  "publishConfig": { "registry": "https://npm.pkg.github.com/" },
+  
   "homepage": "https://github.com/colyseus/colyseus-social#readme",
   "dependencies": {
     "@types/mongoose": "^5.3.27",
