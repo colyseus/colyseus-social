@@ -3,3 +3,4 @@ node_modules
 *.d.ts
 .DS_Store
 package-lock.json
+.log/
