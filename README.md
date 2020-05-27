@@ -16,7 +16,7 @@
   </a>
   <h3>
     Authentication and Social features for <a href="https://github.com/colyseus/colyseus">Colyseus</a><br />
-    <a href="https://docs.colyseus.io/authentication">View documentation</a>
+    <a href="https://docs.colyseus.io/tools/colyseus-social/">View documentation</a>
   </h3>
 </div>
 
