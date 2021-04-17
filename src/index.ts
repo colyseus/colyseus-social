@@ -202,7 +202,7 @@ export async function updateUser(_id: ObjectId, fields: Partial<IUser>) {
      */
     if ($set['username']) {
         const found = await User.findOne({ username: $set['username'] }, { _id: 1 });
-        if (found && found._id !== _id) {
+        if (found && found._id.toString() !== _id.toString()) {
             throw new Error("username taken");
         }
     }
