@@ -31,6 +31,7 @@ const tryOrErr = async (res: Response, cb: () => void, statusCode: number) => {
 
 const jwtMiddleware = jwt({
     secret: JWT_SECRET,
+    algorithms: ['HS256'],
     userProperty: "cauth",
     getToken: function (req) {
         if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
