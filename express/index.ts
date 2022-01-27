@@ -52,7 +52,7 @@ connectDatabase();
 const auth = express.Router();
 auth.post("/", async (req, res) => {
     tryOrErr(res, async () => {
-        const { accessToken, deviceId, platform, token, email, password } = req.query;
+        const { accessToken, deviceId, platform, token, email, password } = req.body;
 
         const user = await authenticate({ accessToken, deviceId, platform, token, email, password });
         if (deviceId && platform) {
@@ -175,7 +175,7 @@ push.post("/subscribe", async (req, res) => {
 });
 
 const routes = express.Router();
-routes.use("/auth", auth);
+routes.use("/auth", express.json(), auth);
 routes.use("/push", express.json(), push);
 routes.use("/friends", friend);
 
